@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from geometry_msgs import Twist
+from geometry_msgs.msg import Twist
 from drive_by_wire import cart_values
 
 
@@ -23,7 +23,7 @@ def hardware_controller():
         rospy.loginfo(val)
         pub.publish(val)
         rate.sleep()
-        
+
 if __name__ == '__main__':
     try:
         hardware_controller()
