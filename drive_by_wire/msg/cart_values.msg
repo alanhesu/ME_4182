@@ -1,2 +1,0 @@
-float32 throttle
-int32 steering_angle

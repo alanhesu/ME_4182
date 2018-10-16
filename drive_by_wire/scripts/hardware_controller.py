@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import Twist
-from drive_by_wire import cart_values
-
+from drive_by_wire.msg import Cart_values
 
 def callback(data):
     constant = 1
@@ -10,16 +9,22 @@ def callback(data):
     global val
     linear_vel = data.linear.x
     angular_vel = data.angular.z
-    val.steering_angle = constant * (angular_vel / linear_vel)
+    val.throttle = linear_vel
+    val.brake = data.linear.z
+    if linear_vel != 0:
+        val.steering_angle = constant * (angular_vel / linear_vel)
+    else:
+        val.steering_angle = 0
     rospy.loginfo(val.steering_angle)
 
+pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
+rospy.init_node('hardware_controller', anonymous=True)
+rospy.Subscriber("keyboard", Twist, callback)
+rate = rospy.Rate(10)
+val = Cart_values()
+
 def hardware_controller():
-    pub = rospy.Publisher('Arduino_commands', cart_values, queue_size=10)
-    rospy.init_node('hardware_controller', anonymous=True)
-    rospy.Subscriber("keyboard", Twist, callback)
-    rate = rospy.Rate(10)
     while not rospy.is_shutdown():
-        val = cart_values()
         rospy.loginfo(val)
         pub.publish(val)
         rate.sleep()

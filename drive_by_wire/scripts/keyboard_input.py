@@ -12,14 +12,13 @@ vel_msg = Twist()
 vel_max_linear = 5
 min_turn_radius = 3
 vel_max_angular = vel_max_linear * min_turn_radius
-vel_linear_inc = .1
+vel_linear_inc = .5
 vel_angular_inc = .1
 
 def keyboard_input():
     global vel_msg
     while not rospy.is_shutdown():
         text = raw_input()
-        rospy.loginfo(text)
         if 'w' in text:
             if vel_msg.linear.x < vel_max_linear:
                 vel_msg.linear.x += vel_linear_inc
@@ -32,11 +31,17 @@ def keyboard_input():
         if 'a' in text:
             if vel_msg.angular.z < vel_max_angular:
                 vel_msg.angular.z += vel_angular_inc
+        if 'b' in text:
+            vel_msg.linear.z = 3
+            vel_msg.linear.x = 0
+        if 'n' in text:
+            vel_msg.linear.z = 0
         pub.publish(vel_msg)
         rospy.loginfo(vel_msg)
         rate.sleep()
 
     vel_msg.linear.x = 0
+    vel_msg.linear.z = 0
     vel_msg.angular.z = 0
     pub.publish(vel_msg)
 
