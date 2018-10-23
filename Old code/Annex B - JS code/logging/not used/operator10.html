@@ -1,0 +1,1415 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Main Screen</title>
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+
+    <!-- <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <script src='//static.opentok.com/v2/js/opentok.min.js'></script>
+
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+
+    <link href="switch/bootstrap-switch.css" rel="stylesheet">
+    <script src="switch/bootstrap-switch.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Orbitron" />
+
+    <link rel="stylesheet" type="text/css" href="css/kj-mainscreen.css"/>
+
+    <link rel="stylesheet" href="https://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" href="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.css">
+    <script src="https://d3js.org/d3.v3.js"></script>
+    <script src="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.js"></script>
+
+    <script src="https://rawgit.com/benkeen/d3pie/master/d3pie/d3pie.min.js"></script>
+    
+    <!-- Get the token from gatechmsl server -->
+    <script src="https://gatechmsl.com/token/mytoken.js"></script>
+
+    <script type="text/javascript">
+      // var valueObject = window.opener.valueObject;
+      // var session;
+
+      // var g;
+      var currentSpeed = 0;
+      var preSpeed = 0;
+
+      var clock = 0;
+      var powerOn = false;
+
+
+      var frontConnected = false;
+      var rearConnected = false;
+      var FrontWatchDogTimer = 0;
+      var RearWatchDogTimer = 0;
+
+      //for LiDar data
+      // set the number of segments
+      var segmentDegree = 360;
+
+      var values = [];
+      var lidarData = null;
+      //pie chart
+      var lowLidar = 10;
+
+    </script>
+
+  <style> 
+      #container {
+        width: 300%;
+        height: 100%;
+        position: absolute;
+      }
+      #leftContainer, #centerContainer, #rightContainer{
+        width: calc(100% / 3);
+        height: 100%;
+        float: left;
+        overflow: hidden;
+      }
+
+      #leftCam, #midCam, #rightCam{
+        width: 100%;
+        height: 100%;
+        z-index:  -1;
+        background-repeat:no-repeat;
+        background-size: cover;
+      }
+
+    #leftCam {
+        background: url(https://placehold.it/1600x1200&text=Left+Camera);
+      }
+
+    #rightCam {
+        background: url(https://placehold.it/1600x1200&text=Right+Camera);
+      }
+
+      #midCam {
+        background: url(https://placehold.it/1600x1200&text=Front+Camera);
+      }
+
+      #rearCam {
+        background-repeat:no-repeat;
+        background-size: cover;
+        background: url(https://placehold.it/400x400&text=Rear+Camera);
+        /*z-index:  9000;*/
+      }
+
+
+      #centerContainer {
+        z-index:  0;
+        position: relative;
+      }
+
+      #rearCamContainer {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 400px;
+        height: 400px;
+        border:1px solid #d3d3d3;
+        z-index:  1;
+        background: url(https://placehold.it/400x400&text=Rear+Camera);
+        background-repeat:no-repeat;
+        background-size: cover;
+        /*z-index:  9000;*/
+
+      }
+
+      #switchContainer1 {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        z-index: 3000;
+      }
+
+      #switchContainer2 {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        z-index: 3000;
+
+      }
+
+    .clickArea {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 40%;
+        height: 40%;
+        margin-left: -20%;
+        margin-top: -20%;
+        z-index: 3000;
+        cursor:pointer;
+      }
+
+     #drawing {
+        /*border: 1px solid #E2252D;*/
+        opacity: 0.7;
+        /*display: block;*/
+        position: fixed;
+        z-index: 4000;
+        /*height: 50%;*/
+        /*width: calc(100% / 3)/2;*/
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      #myCanvas {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        /*pointer-events: none;*/
+        z-index: 4000;
+
+      }
+
+      #midShadow, #rearShadow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1500;
+      }  
+  </style>
+
+
+</head>
+
+<body onload="centerView()" onresize="centerView()" onbeforeunload="unload()">
+
+
+<div class="bg">
+  <span id="pointer"></span>
+  <img id ="backimg" src="fordSpeedo.png"/>
+  <div id="radarChart"></div>
+  <div id="pieChart"></div>
+</div>
+
+<div id="drawing"><canvas id="myCanvas"></canvas></div>
+
+<div id="rearCamContainer">
+  <div id="rearCam"></div>
+  <div class="clickArea" onclick="changeStat2()"></div>
+  <div id="rearShadow" class="shadow"></div>
+
+  <div id="switchContainer2">
+        <input id="switch2" type="checkbox" name="my-checkbox" data-label-text="Rear Camera" data-size="mini" data-on-color="success" data-off-color="danger" >
+            <!-- connection signal -->
+            <span id="rearConnectSign" class="glyphicon glyphicon-record" style="color:grey; font-size:15px"></span>
+        </input>
+    </div>
+</div>
+
+<div id = "container">
+
+  <div id="leftContainer">
+    <!-- <div id="leftShadow" class="shadow"></div> -->
+    <div id="leftCam"></div>
+  </div>
+
+  <div id="centerContainer" >
+
+    <div id="midCam"></div> 
+       
+    <div class="clickArea" onclick="changeStat1()"></div>
+    <div id="midShadow" class="shadow"></div>
+
+    <div id="switchContainer1">
+           <input id="switch1" type="checkbox" name="my-checkbox" data-label-text="Front Camera" data-label-width="100px" data-on-color="success" data-off-color="danger">
+            <!-- connection signal -->
+            <span id="frontConnectSign" class="glyphicon glyphicon-record" style="color:grey; font-size:20px"></span>
+          </input>
+      </div>
+  </div>
+
+  <div id="rightContainer">
+    <div id="rightCam"></div>
+    <!-- <div id="rightShadow" class="shadow"></div> -->
+
+  </div>
+
+  
+</div>
+
+
+  <script type="text/javascript">
+
+    $("[name='my-checkbox']").bootstrapSwitch();
+
+  </script>
+
+  <script type="text/javascript">
+    //check the status 
+    $('button').prop('disabled', true);
+  </script>
+
+  <script type="text/javascript">
+    // $("#navImg").hide();
+  </script>
+
+<script>
+  //Subscribe to all streams when close the window
+  function unload() {
+
+  }
+  // $("[name='my-checkbox']").bootstrapSwitch('setState', true || false, true);
+  // $("#switch1").bootstrapSwitch('state', true, true);
+
+  //data session, FIXME, may not needed
+  dataSession = OT.initSession(apiKey , dataId);
+  frontSession = OT.initSession(apiKey, frontId);
+  rearSession = OT.initSession(apiKey, rearId);
+  leftSession = OT.initSession(apiKey, leftId);
+  rightSession = OT.initSession(apiKey, rightId);
+
+  // session = OT.initSession(apiKey, sessionId);
+
+  var left, front, right, rear;
+
+  var leftCamOn = false;
+  var frontCamOn = false;
+  var rearCamOn = false;
+  var rightCamOn = false;
+
+  //start subscribing
+  frontSession.on('streamCreated', function(event) {
+    front = frontSession.subscribe(event.stream, 'midCam', {width: "100%", height: "100%", style: {buttonDisplayMode: "off", nameDisplayMode:"off"}});
+    //update the status of the switch
+    if ($("#switch1").bootstrapSwitch('state') == false ) {
+      $("#switch1").bootstrapSwitch('state', true, true);
+    }
+    frontCamOn = true;
+    console.log(event.stream.name  + "stream noticed!!!!!!!!!");
+  });
+
+  rearSession.on('streamCreated', function(event) {
+    rear = rearSession.subscribe(event.stream, 'rearCam', {width: "100%", height: "100%", style: {buttonDisplayMode: "off", nameDisplayMode:"off"}});
+    //update the status of the switch
+    if ($("#switch2").bootstrapSwitch('state') == false ) {
+      $("#switch1").bootstrapSwitch('state', true, true);
+    }
+    rearCamOn = true;
+  });
+
+
+  leftSession.on('streamCreated', function(event) {
+    left = leftSession.subscribe(event.stream, 'leftCam', {width: "100%", height: "100%", style: {buttonDisplayMode: "off", nameDisplayMode:"off"}});
+    leftCamOn = true;
+  });
+
+  
+  rightSession.on('streamCreated', function(event) {
+    right = rightSession.subscribe(event.stream, 'rightCam', {width: "100%", height: "100%", style: {buttonDisplayMode: "off", nameDisplayMode:"off"}});
+    rightCamOn = true;
+  });
+
+    frontSession.on("streamDestroyed", function (event) {
+      event.preventDefault();
+      console.log(event.stream.name + "ended!");
+      if ($("#switch1").bootstrapSwitch('state') == true ) {
+        $("#switch1").bootstrapSwitch('state', false, true);
+      } 
+      frontCamOn = false;
+    });
+
+
+    rearSession.on("streamDestroyed", function (event) {
+      event.preventDefault();
+      console.log(event.stream.name + "ended!");
+      if ($("#switch2").bootstrapSwitch('state') == true ) {
+        $("#switch2").bootstrapSwitch('state', false, true);
+      } 
+      rearCamOn = false;
+    });
+
+    leftSession.on("streamDestroyed", function (event) {
+      event.preventDefault();
+      console.log(event.stream.name + "ended!");
+      leftCamOn = false;
+    });
+
+    rightSession.on("streamDestroyed", function (event) {
+      event.preventDefault();
+      console.log(event.stream.name + "ended!");
+      rightCamOn = false;
+    });
+
+  //for priority signal
+  dataSession.on("signal:priority", function(event) {
+    console.log("Signal sent from connection " + event.from.id);
+    console.log("Signal sent from connection " + event.data);
+
+    if (event.data == "frontOn") {
+      document.getElementById("midShadow").style.boxShadow = "0px 0px 50px red inset";
+    } else if (event.data == "frontOff") {
+      document.getElementById("midShadow").style.boxShadow = null;
+    } else if (event.data == "rearOn") {
+      document.getElementById("rearShadow").style.boxShadow = "0px 0px 50px red";
+    } else if (event.data == "rearOff") {
+      document.getElementById("rearShadow").style.boxShadow = null;
+    }
+
+
+    //for ssim detection
+    var data = event.data;
+    if (data.cameraView == "Front") {
+      if(frontCamOn) {
+        document.getElementById("midShadow").style.boxShadow = "0px 0px 50px red inset";
+        setTimeout(function() {
+          document.getElementById("midShadow").style.boxShadow = null;
+        }, 5000);
+      }
+    }
+
+    if (data.cameraView == "Rear") {
+      if(rearCamOn) {
+        document.getElementById("rearShadow").style.boxShadow = "0px 0px 20px red";
+        setTimeout(function() {
+          document.getElementById("rearShadow").style.boxShadow = null;
+        }, 5000);
+      }
+    }
+
+
+    // if (data.priorityLevel) {
+    //   //update when a larger level is found
+    //   var newPriorityLevel = data.priorityLevel;
+    //   if (newPriorityLevel > currentPriorityLevel) {
+    //     currentPriorityLevel = newPriorityLevel;
+    //     currentHightLight = data.cameraView;
+    //     //if it is me, hightlight myself
+    //     if (currentHightLight == "Front") {
+    //       if (frontCamOn) {
+    //         document.getElementById("midShadow").style.boxShadow = "0px 0px 50px red inset";
+    //       }
+    //       document.getElementById("rearShadow").style.boxShadow = null;
+    //     } else if (currentHightLight == "Rear") {
+    //       if (rearCamOn) {
+    //         document.getElementById("rearShadow").style.boxShadow = "0px 0px 50px red";
+    //       }
+    //       document.getElementById("midShadow").style.boxShadow = null;
+    //     } else {
+    //       //dehight if not this two
+    //       document.getElementById("midShadow").style.boxShadow = null;
+    //       document.getElementById("rearShadow").style.boxShadow = null;
+    //     }
+
+    //     if (resetPriority) {
+    //       clearTimeout(resetPriority);
+    //     }
+
+    //     resetPriority = setTimeout(function() {
+    //       document.getElementById("midShadow").style.boxShadow = null;
+    //       document.getElementById("rearShadow").style.boxShadow = null;
+    //       currentPriorityLevel = -1;
+    //     }, 5000);
+    //   } 
+    // }
+
+  });
+
+dataSession.on("signal:cartSpeed", function(event) {
+  currentSpeed = event.data;
+  if (currentSpeed != preSpeed) {
+    //update the speedometer
+
+    //calculate the degree of the pointer
+    var degree = currentSpeed/120 * 220 -20;
+    var interval = 1;
+    $("#pointer").css({
+     "transform": "rotate(" + degree + "deg)",
+     WebkitTransition: interval + 's',
+     transition: interval + 's'
+    });
+
+    preSpeed = currentSpeed;
+  }
+});
+
+
+
+var svg = d3.select('#radarChart').append('svg')
+  .attr('width', '100%')
+  .attr('height', '100%');
+
+var chart = RadarChart.chart();
+
+chart.config({
+  w: 200,
+  h: 200,
+  axisText: false,
+  circles: false,
+  factor: 0.9,
+  levels: 3,
+  maxValue: 100,
+  axisLine: false,
+  color:(function() {}),
+   // d3.scale.category10(), // pass a noop (function() {}) to decide color via css
+  transitionDuration: 10
+});
+
+function initData() {
+  lidarData = null;
+  lidarData = [];
+  for (var i = 0; i < segmentDegree; i++) {
+    lidarData[i] = {
+      value: 0
+    };
+  }
+  values[0] = null;
+  values[0] = {
+    className: 'lidar',
+    axes: lidarData
+  };
+
+  svg.append('g').classed('single', 1).datum(values).call(chart);
+}
+
+initData();
+
+dataSession.on("signal:liData", function(event) {
+  var newLidar = event.data;
+        console.log(newLidar);
+
+        lidarData[newLidar.degree].value = newLidar.distance;
+        lidarData[(newLidar.degree + 1) % segmentDegree].value = newLidar.distance;
+        lidarData[(newLidar.degree - 1) % segmentDegree].value = newLidar.distance;
+        lidarData[(newLidar.degree + 2) % segmentDegree].value = newLidar.distance;
+        lidarData[(newLidar.degree - 2) % segmentDegree].value = newLidar.distance;
+
+ 
+
+
+        values[0] = null;
+        values[0] = {
+          className: 'lidar',
+          axes: lidarData
+        };
+
+        //plot the chart with update values
+        var game = svg.select('g.single').datum(values);
+        game.call(chart);
+
+        // lidarData[newLidar.degree].value = 0;
+        // values[0] = null;
+        // values[0] = {
+        //   className: 'lidar',
+        //   axes: lidarData
+        // };
+
+});
+
+//loop to erase the chart every two seconds
+setInterval(function() {
+  // zeros the lidarData
+  for (var i = 0; i < segmentDegree; i++) {
+    lidarData[i] = {
+      value: 0
+    };
+  }
+  //update value object
+  values[0] = null;
+  values[0] = {
+    className: 'lidar',
+    axes: lidarData
+  };
+
+  //plot the chart with update values
+  var game = svg.select('g.single').datum(values);
+  game.call(chart);
+}, 10000);
+
+
+  dataSession.on("signal:power", function(event) {
+    console.log("Signal sent from connection " + event.from.id);
+      if (event.data == true) {
+        if (!powerOn) {
+          powerOn = true;
+          console.log("Power On!");
+          $('button').prop('disabled', false);
+          //for demo
+
+
+        //piechart
+        var segmentsColor = [];
+        for (var i = 0; i < 12; i++) {
+          segmentsColor[i] = "#32ff32";
+        }
+
+        /*segmentsColor[11] = "";*/
+        var pie = new d3pie("pieChart", {
+          "size": {
+            "canvasHeight": 208,
+            "canvasWidth": 208,
+            "pieInnerRadius": "0%",
+            "pieOuterRadius": "100%"
+          },
+          "data": {
+            "content": [{
+              "label": 1,
+              "value": 10,
+              //"color": "#4c0000",
+            }, {
+              "label": 2,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 3,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 4,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 5,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 6,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 7,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 8,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 9,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 10,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 11,
+              "value": 10,
+              //"color": "#4c0000"
+            }, {
+              "label": 12,
+              "value": 10,
+              //"color": "#4c0000"
+            }]
+          },
+          "labels": {
+            "outer": {
+              "format": "none",
+            },
+            "inner": {
+              "format": "none"
+            },
+          },
+          "effects": {
+            "load": {
+              "effect": "none",
+              "speed": 300
+            },
+            "pullOutSegmentOnClick": {
+              "effect": "none",
+            }
+          },
+
+          "misc": {
+            "colors": {
+              "segmentStroke": "#d3d3d3",
+              "segments": segmentsColor
+            }
+          }
+        });
+
+        var myVar = setInterval(function() {
+          var victimSegment = [];
+          var updatedColor = [];
+          for (var i = 0; i < 12; i++) {
+            updatedColor[i] = "#32ff32";
+          }
+
+          for (var i = 0; i < segmentDegree; i++) {
+         
+            if ((lidarData[segmentDegree - 1 -i].value > 0) && (lidarData[segmentDegree - 1 -i].value <= lowLidar)) {
+              //to test which segment does the victim belong to
+              victimSegment.push(parseInt(i / segmentDegree * 12));
+            }
+          }
+
+          for (var i = 0; i < victimSegment.length; i++) {
+            updatedColor[victimSegment[i]] = "#FF1919";
+          }
+
+          pie.updateProp("misc.colors.segments", updatedColor);
+
+        }, 1000);
+      }
+    }
+  });
+
+
+  //check for connecting status!!
+  var iFrequency = 5000; // expressed in miliseconds
+  var frontInterval = 0;
+  var rearInterval = 0;
+
+  startLoop();
+  // STARTS and Resets the loop if any
+  function startLoop() {
+    RearWatchDogTimer = 0;
+    FrontWatchDogTimer = 0;
+    if(frontInterval > 0) clearInterval(frontInterval);  // stop
+    frontInterval = setInterval( function() {
+      if(FrontWatchDogTimer==0){
+        if (frontConnected) {
+          $("#frontConnectSign").css({"color":"grey"});
+          frontConnected = false;
+        }
+      }
+      FrontWatchDogTimer = 0;
+    }, iFrequency );  // run
+
+    if(rearInterval > 0) clearInterval(rearInterval);  // stop
+    rearInterval = setInterval( function() {
+      if(RearWatchDogTimer===0){
+        //if green, turn red
+        console.log("no rear cameraReady signal!");
+
+        if (rearConnected) {
+          $("#rearConnectSign").css({"color":"grey"});
+          rearConnected = false;
+        }
+      }
+    RearWatchDogTimer = 0;
+    }, iFrequency );  // run
+  }
+
+    //TEMPORY VERSION
+    frontSession.on("signal:cr", function(event) {
+
+     FrontWatchDogTimer = 1;
+     if(!frontConnected){
+        $("#frontConnectSign").css({"color":"#00FF00"});
+        frontConnected = true;
+      }
+
+   });
+ 
+    //TEMPORY VERSION
+    rearSession.on("signal:cr", function(event) {
+     RearWatchDogTimer = 1;
+     if(!rearConnected){
+        $("#rearConnectSign").css({"color":"#00FF00"});
+        rearConnected = true;
+      }
+   });
+
+  //connect to each session
+  frontSession.connect(frontToken);
+  rearSession.connect(rearToken);
+  leftSession.connect(leftToken);
+  rightSession.connect(rightToken);
+  dataSession.connect(dataToken);
+
+</script>
+
+<script type="text/javascript">
+  function centerView() {
+    var widthOfContainer = document.getElementById("container").offsetWidth;
+    window.scrollTo(widthOfContainer/3, 0);
+    console.log("center view!");
+  }
+</script>
+
+
+<script type="text/javascript">
+
+  // $("#switch1").bootstrapSwitch('state', true, true);
+
+  $("#switch1").on('switchChange.bootstrapSwitch', function(event, state) {
+    // changeStat1();
+    camStat('Front', state, frontSession);
+  });
+
+  $("#switch2").on('switchChange.bootstrapSwitch', function(event, state) {
+    // changeStat1();
+    camStat('Rear', state, rearSession);
+  });
+
+
+  function changeStat1() {
+    $("#switch1").bootstrapSwitch('toggleState');
+  }
+
+  function changeStat2() {
+    $("#switch2").bootstrapSwitch('toggleState');
+  }
+
+  function camStat(camId, state, currentSession) {
+    var command;
+    if (state) {
+      command = "start".concat(camId);
+      console.log("starting " + camId + " camera...");
+    } else {
+      command = "stop".concat(camId);
+      console.log("stopping " + camId + " camera...");
+    }
+
+      currentSession.signal(
+        {
+        // to: connections[num];
+          data: command,
+          type: "ViewControl"
+        },
+        function(error) {
+         if (error) {
+            console.log("signal error ("
+                        + error.code
+                        + "): " + error.message);
+          } else {
+             console.log("signal sent.");
+          } 
+        }                      
+      );
+  }
+
+</script>
+
+
+
+<script type="text/javascript">
+
+  function shiftView(Steering) {
+    var shift = Steering / 6;
+    var widthOfContainer = document.getElementById("container").offsetWidth;
+    console.log(widthOfContainer);
+    window.scrollTo(widthOfContainer / 3 * (1 + shift), 0);
+    // console.log("shifting view to " + (widthOfContainer * (1 + shift)));
+  }
+
+  //function used to control pointer of speedometer
+  function speedoDisplay(preAccelInput, AccelInput) {
+    //AccelInput range from -1 to 1
+    // for AccelInput
+  }
+
+	function paramater(){
+		this.value=0;
+		this.tStamp=0;
+	};
+	
+  var start;
+  var Steering = new paramater();
+  var preSteering = new paramater();
+  var AccelInput = new paramater();
+  var preAccelInput = 0;
+  var BrakeInput = new paramater(); //brake plays no function in the drawloop function
+  var preBrakeInput = 0;
+  var Lag = 1500; //if lag value is available. otherwise use predefined value
+  var dt = 0.01;  // time step (0.01 seconds) for drawing the line  *******DT line length*******
+
+  var FWD=new paramater();
+  var FWD1=0;
+  var FWD2=0;
+  var FWD3=0;
+  var preFWD=0;  
+
+  var REV = new paramater();
+  var REV1 = 0
+  var REV2 = 0;
+  var REV3 = 0;
+  var preREV = 0;
+
+  var EMG = new paramater();
+  var EMG1 = 0;
+  var EMG2 = 0;
+  var preEMG = 0;
+  
+  var STR = new paramater();
+  var STR1 = 0;
+  var STR2 = 0;
+  var preSTR = 0;
+
+////////////////////include camera buttons
+	var CAMF=new paramater();
+	var CAMR=new paramater();
+	var CAML=new paramater();
+	var CAMPulse=new paramater();
+  
+	var preCAMF=0;
+	var preCAMR=0;
+	var preCAML=0;
+	var preCAMPulse=0;
+////////////////////include camera buttons
+  var canvas = document.getElementById('myCanvas');
+
+  // canvas.width = 100%;
+  // canvas.height = 100%;
+
+  var context = canvas.getContext('2d');
+  // set line width for all lines
+
+
+
+  var rAF = window.mozRequestAnimationFrame ||
+  window.webkitRequestAnimationFrame ||
+  window.requestAnimationFrame;
+
+  var rAFStop = window.mozCancelRequestAnimationFrame ||
+  window.webkitCancelRequestAnimationFrame ||
+  window.cancelRequestAnimationFrame;
+
+  window.addEventListener("gamepadconnected", function() {
+    var gp = navigator.getGamepads()[0];
+    drawLoop();
+  });
+
+  window.addEventListener("gamepaddisconnected", function() {
+    rAFStop(start);
+  });
+
+
+  //????
+  if(navigator.webkitGetGamepads) {  // Webkit browser that uses prefixes
+    var interval = setInterval(webkitGP, 500);
+  }
+
+  function webkitGP() {
+    var gp = navigator.webkitGetGamepads()[0];
+    if(gp) {
+      drawLoop();
+      clearInterval(interval);
+    }
+  }
+
+  //function Vel(et){
+  //  var vell[];
+  //  vell=[4.5*et[0],4.5*et[1]]; //4.5 m/s is approximately 10 miles per hour
+  //  return vell;
+  //}
+
+  //function Accel(Ainput,V,et,en){
+  //  var accell[];
+  //  accell=[A*et[0]+V,
+  //}
+/////////////////////////////////////////////////Connection test
+var ConnectionTest= setInterval(function(){ ConnectionTimer() }, 200);
+var ConnRanNum = 0;
+
+function ConnectionTimer() {
+  ConnRanNum = Math.floor(Math.random()*1000+1);
+  dataSession.signal({
+    type: "ConnRanNum",
+    data: ConnRanNum
+  });
+  // console.log(ConnRanNum);
+}
+ /////////////////////////////////////////////////Connection test
+
+ /////////////////////////////////////////////////time sync
+ dataSession.on("signal:TimeSync", function(event) {
+  
+	var sync = event.data;
+	console.log(sync);
+	
+	var arriveTime = new Date();
+	sync.sentTimeB = arriveTime.getTime(); 
+	
+	var sendTime = new Date();
+	sync.sentTimeC = sendTime.getTime(); 
+	
+	dataSession.signal({
+            type: "TimeSyncR",
+            data: sync
+    });
+
+});
+ /////////////////////////////////////////////////time sync
+ function obtainTime(){
+	var time= new Date();
+	return time.getTime();
+ }
+ 
+ //Drawloop and session emit 
+ function drawLoop() {
+
+      if(navigator.webkitGetGamepads) {
+        var gp = navigator.getGamepads()[0];
+        Steering.value = gp.axes[0]; //range -1 to 1 with -1 full left turn
+        AccelInput.value = gp.axes[2]; //range -1 to 1 with -1 fully throttled
+        BrakeInput.value = gp.axes[3]; //range -1 to 1 with -1 fully braked
+        FWD1 = +gp.buttons[8].pressed;
+        FWD2 = +gp.buttons[10].pressed;
+        FWD3 = +gp.buttons[12].pressed;
+        REV1 = +gp.buttons[9].pressed;
+        REV2 = +gp.buttons[11].pressed;
+        REV3 = +gp.buttons[13].pressed;
+        EMG1 = +gp.buttons[4].pressed;
+        EMG2 = +gp.buttons[5].pressed;
+        STR1 = +gp.buttons[1].pressed;
+        STR2 = +gp.buttons[2].pressed;
+        
+        if(preSteering==Steering.value){
+        } else{    
+			
+		  var time= new Date();
+		  Steering.tStamp=time.getTime();
+		  
+          dataSession.signal({
+            type: "Steering",
+            data: Steering
+          });
+          console.log(Steering);
+		  console.log(Steering.value);
+		  console.log(Steering.tStamp);
+          //view shift
+          //shiftView(Steering.value);
+			shiftView(0);
+          //
+          preSteering=Steering.value;
+        }
+        
+        if(preAccelInput==AccelInput.value){
+        } else{  
+          
+		  var time= new Date();
+		  AccelInput.tStamp=time.getTime();
+		  
+		  dataSession.signal({
+            type: "AccelInput",
+            data: AccelInput
+          });
+          // console.log(AccelInput);
+          preAccelInput=AccelInput.value;
+        }
+        
+        if(preBrakeInput==BrakeInput.value){
+        } else{
+          
+		  var time= new Date();
+		  AccelInput.tStamp=time.getTime();
+		  
+		  dataSession.signal({
+            type: "BrakeInput",
+            data: BrakeInput
+          });
+          // console.log(BrakeInput);
+          preBrakeInput=BrakeInput.value;
+        }
+        
+        
+        if(preFWD == ((+FWD1) + (+FWD2) + (+FWD3))){
+        } else{
+          FWD.value=(+FWD1) + (+FWD2) + (+FWD3);            
+          
+		  var time= new Date();
+		  FWD.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "FWD",
+            data: FWD
+          });
+          // console.log(FWD);
+          preFWD=FWD.value;
+        }
+        
+        
+        if(preREV==((+REV1) + (+REV2) + (+REV3))){
+        } else{
+          REV.value=(+REV1) + (+REV2) + (+REV3);            
+          
+		  var time= new Date();
+		  REV.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "REV",
+            data: REV
+          });
+          // console.log(REV);
+          preREV=REV.value;
+        }
+        
+        if(preEMG == (EMG1 && EMG2)){
+        } else{
+          EMG.value=(EMG1 && EMG2);            
+          
+		  var time= new Date();
+		  EMG.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "EMG",
+            data: EMG
+          });
+          // console.log(EMG);
+          preEMG=EMG.value;
+        }
+        
+        if(preSTR == ((+STR1) + (+STR2))){
+        } else{
+
+         STR3=(+STR1) + (+STR2)
+
+         if ((+STR1) == 1){
+          STR.value=1;            
+		  var time= new Date();
+		  STR.tStamp=time.getTime();
+		  dataSession.signal({
+           type: "STR",
+           data: STR
+          });
+          // console.log(STR);
+         }
+
+         if ((+STR2) == 1){
+          STR.value=0;            
+          var time= new Date();
+		  STR.tStamp=time.getTime();
+		  dataSession.signal({
+           type: "STR",
+           data: STR
+          });
+          // console.log(STR);
+         }
+
+         preSTR=STR3;
+		}
+
+
+      // console.log("Accessed if");
+
+
+    } else {
+        var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox
+        var isChrome = !!window.chrome;
+        var gp = navigator.getGamepads()[0];
+        Steering.value = gp.axes[0]; //range -1 to 1 with -1 full left turn
+        AccelInput.value = gp.axes[2]; //range -1 to 1 with -1 fully throttled
+        // BrakeInput = gp.axes[3]; //range -1 to 1 with -1 fully braked
+
+        if (isFirefox) {BrakeInput.value = gp.axes[3];} //range -1 to 1 with -1 fully braked
+        if (isChrome) {BrakeInput.value = gp.axes[5];} //range -1 to 1 with -1 fully braked
+
+        FWD1 = +gp.buttons[8].pressed;
+        FWD2 = +gp.buttons[10].pressed;
+        FWD3 = +gp.buttons[12].pressed;
+        REV1 = +gp.buttons[9].pressed;
+        REV2 = +gp.buttons[11].pressed;
+        REV3 = +gp.buttons[13].pressed;
+        EMG1 = +gp.buttons[4].pressed;
+        EMG2 = +gp.buttons[5].pressed;
+
+        //change buttons index from 0 to 1
+        STR1 = +gp.buttons[1].pressed;
+
+        //change buttons index from 1 to 2
+        STR2 = +gp.buttons[2].pressed;
+        
+		
+////////////////////include camera buttons		
+		CAMF.value= +gp.buttons[15].pressed; 	//cam shift resent to front
+		CAMR.value= +gp.buttons[18].pressed;  //cam shift to right
+		CAML.value= +gp.buttons[16].pressed;  //cam shift to left	
+
+		CAMPulse.value = gp.axes[9];//cam pulse defined by axes value ---> -1; -0.5; 0.5; 1
+////////////////////include camera buttons			
+		
+		
+		
+        if(preSteering==Steering.value){
+          //if the value does not change, do nothing
+        } else{    
+
+          var time= new Date();
+		  Steering.tStamp=time.getTime();  
+          dataSession.signal({
+            type: "Steering",
+            data: Steering
+          });
+          console.log("Steering is " + Steering.value);
+          
+          //view shift
+          //shiftView(Steering.value);
+			shiftView(0);
+
+          //assign the current one to previous
+          preSteering=Steering.value;
+        }
+        
+        if(preAccelInput==AccelInput.value){
+        } else{  
+          var time= new Date();
+		  AccelInput.tStamp=time.getTime(); 
+		  dataSession.signal({
+            type: "AccelInput",
+            data: AccelInput
+          });
+          console.log("AccelInput is " + AccelInput.value);
+          preAccelInput=AccelInput.value;
+        }
+		
+        if(preBrakeInput==BrakeInput.value){
+        } else{
+          var time= new Date();
+		  BrakeInput.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "BrakeInput",
+            data: BrakeInput
+          });
+          console.log("BrakeInput is " + BrakeInput.value);
+          preBrakeInput=BrakeInput.value;
+        }
+        
+        
+        if(preFWD == ((+FWD1) + (+FWD2) + (+FWD3))){
+        } else{
+		  FWD.value=(+FWD1) + (+FWD2) + (+FWD3);            
+          var time= new Date();
+		  FWD.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "FWD",
+            data: FWD
+          });
+          console.log("FWD is " + FWD.value);
+          preFWD=FWD.value;
+        }
+        
+        
+        if(preREV==((+REV1) + (+REV2) + (+REV3))){
+        } else{
+          REV.value=(+REV1) + (+REV2) + (+REV3);            
+          var time= new Date();
+		  REV.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "REV",
+            data: REV
+          });
+          console.log("REV is " + REV.value);
+          preREV=REV.value;
+        }
+        
+        if(preEMG == (EMG1 && EMG2)){
+        } else{
+          EMG.value=(EMG1 && EMG2);            
+          var time= new Date();
+		  EMG.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "EMG",
+            data: EMG
+          });
+          console.log("EMG is " + EMG.value);
+          preEMG=EMG.value;
+        }
+        
+        if(preSTR == ((+STR1) + (+STR2))){
+        } else{
+
+          STR3=(+STR1) + (+STR2)
+
+          if ((+STR1) == 1){
+            STR.value=1;            
+            var time= new Date();
+			STR.tStamp=time.getTime();
+			dataSession.signal({
+              type: "STR",
+              data: STR
+            });
+            console.log("STR is " + STR.value);
+          }
+
+          if ((+STR2) == 1){
+            STR.value=0;            
+            var time= new Date();
+			STR.tStamp=time.getTime();
+			dataSession.signal({
+              type: "STR",
+              data: STR
+            });
+            console.log("STR is " + STR.value);
+          }
+
+          preSTR=STR3;
+        }
+		
+		
+		
+		////////////////////include camera buttons
+		if(preCAMF == CAMF.value){
+        } else{
+          var time= new Date();
+		  CAMF.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "CAMF",
+            data: CAMF
+          });
+          console.log("CAMF is " + CAMF.value);
+          preCAMF=CAMF.value;
+        }
+		
+		if(preCAMR == CAMR.value){
+        } else{
+          var time= new Date();
+		  CAMR.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "CAMR",
+            data: CAMR
+          });
+          console.log("CAMR is " + CAMR.value);
+          preCAMR=CAMR.value;
+        }
+		
+		if(preCAML == CAML.value){
+        } else{
+          var time= new Date();
+		  CAML.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "CAML",
+            data: CAML
+          });
+          console.log("CAML is " + CAML.value);
+          preCAML=CAML.value;
+		}
+		
+		if(preCAMPulse == CAMPulse.value){
+        } else{
+          var time= new Date();
+		  CAMPulse.tStamp=time.getTime();
+		  dataSession.signal({
+            type: "CAMPulse",
+            data: CAMPulse
+          });
+          console.log("CAMPulse is " + CAMPulse.value);
+          preCAMPulse=CAMPulse.value;
+		}
+		////////////////////include camera buttons
+		
+		
+
+        // console.log("Accessed else");
+
+    }
+
+
+
+     context.clearRect(0,0,context.canvas.width,context.canvas.height); //the rectangle should be as large as the canvas stated at the beginning of the body
+      
+      var centerX= context.canvas.width/2;
+      var centerY= context.canvas.height;
+      
+      var rho= Math.tan(-Steering.value*0.002+Math.PI/2); // transform steering range from -1 to 1 to rho (radius of curvature) ******RHO******
+      
+      var etx = 0; //define initial directions (remember that the centre of the coordinate system is on the upper left side of the screen)
+      var ety = 1;
+      
+      var enx = 1; //define initial directions
+      var eny = 0;
+      
+      var Vx = 0; // initial velocity in X
+      var Vy = 1; // initial velocity in Y here is where we would put the velocity feed back value if we had it
+                  // USE velocity value for length scaling.    
+                  
+      var Vxy=Math.sqrt(Math.pow(Vx,2)+Math.pow(Vy,2)); //initial normal velocity
+      
+      //var AtangentX = AccelInput * etx;
+      //var AtangentY = AccelInput * ety;
+      
+      
+      
+      var AtangentX = (-AccelInput.value+1)/2*etx; // initial tangential acceleration
+      var AtangentY = (-AccelInput.value+1)/2*ety; // initial tangential acceleration
+      
+      var AnormalX = Math.pow(Vxy,2)/rho*enx; // initial normal acceleration
+      var AnormalY = Math.pow(Vxy,2)/rho*eny; // initial normal acceleration
+      
+      var posX = 0; // initial position
+      var posY = 0;
+      
+      var SCALE=0.18; // testing
+
+      context.beginPath();
+      context.moveTo(centerX, centerY);
+        for (i=0;i<5000;i++){ // i < 500 with 5000 equals 5 seconds (not valid)
+
+          posX = posX + Vx * dt + 0.5 * (AtangentX + AnormalX) * Math.pow(dt,2);
+          posY = posY + Vy * dt + 0.5 * (AtangentY + AnormalY) * Math.pow(dt,2);
+          
+          Vx = Vx + (AtangentX + AnormalX) * dt;
+          Vy = Vy + (AtangentY + AnormalY) * dt;
+          Vxy = Math.sqrt(Math.pow(Vx,2) + Math.pow(Vy,2));
+          
+          etx = Vx / (Math.sqrt(Math.pow(Vx,2)+Math.pow(Vy,2)));
+          ety = Vy / (Math.sqrt(Math.pow(Vx,2)+Math.pow(Vy,2)));
+          
+          enx = ety;
+          eny = -etx;
+          
+          //AtangentX = AccelInput * etx;
+          //AtangentY = AccelInput * ety;
+          AtangentX = (-AccelInput.value+1)/2 * etx;
+          AtangentY = (-AccelInput.value+1)/2 * ety;
+          
+          AnormalX = Math.pow(Vxy,2) / rho * enx;
+          AnormalY = Math.pow(Vxy,2) / rho * eny;
+          
+          cos_posY=Math.cos(Math.PI/4)*posY*0.6; // ******** POV cosine ********
+          
+          context.lineTo((posX*SCALE+centerX),(-cos_posY*SCALE+centerY));
+          //context.lineTo(centerX+i/(Steering*3+1), centerY-Math.pow(i,2)/500);
+          
+          if(i==Lag){
+            Lag_posX=posX*SCALE;
+            Lag_posY=cos_posY*SCALE;
+          }
+          
+        }
+
+
+
+      context.lineJoin = 'round'; // round line join (middle)
+
+
+      //adjust line width
+      context.lineWidth = 1; // *******Line width******* //test
+      context.strokeStyle = 'rgb(43,221,11)';
+      context.stroke(); //draw prediction line
+      
+      context.beginPath();
+      context.moveTo(context.canvas.width,context.canvas.height);
+      context.lineTo(centerX+Lag_posX+context.canvas.width*2/6,-Lag_posY+centerY);
+      context.lineTo(centerX+Lag_posX+context.canvas.width*1/6,-Lag_posY+centerY);
+      context.moveTo(centerX+Lag_posX-context.canvas.width*1/6,-Lag_posY+centerY);
+      context.lineTo(centerX+Lag_posX-context.canvas.width*2/6,-Lag_posY+centerY);
+      context.lineTo(0,context.canvas.height);
+
+      //adjust line width
+      context.lineWidth = 1;
+      context.strokeStyle = 'rgb(255,0,0)';
+      context.stroke(); //draw car position (red box on the bottom)
+      
+      context.beginPath();
+      context.arc(centerX+Lag_posX, -Lag_posY+centerY, 2, 0, 2 * Math.PI, false);
+      context.fillStyle = 'rgb(255,0,0)';
+      context.fill();
+
+      //adjust line width
+      context.lineWidth = 0.3;
+      context.strokeStyle = 'rgb(255,0,0)';
+      context.stroke(); // draw red dot on prediction line (just in case)
+      
+      
+      preSteering=Steering.value;
+
+      var start = rAF(drawLoop);
+
+ }
+
+</script>
+
+
+</body>
+</html>

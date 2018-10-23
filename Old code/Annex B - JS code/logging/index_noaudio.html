@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>  
+  <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+
+  <!-- not working -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <!-- Get the token from gatechmsl server -->
+  <script src="https://gatechmsl.com/token/mytoken.js"></script>
+
+
+  <style type="text/css">
+    #linkSection {
+      position: absolute;
+    }
+</style>
+
+
+  <style>
+    .audioSection {
+      position:absolute;
+    }
+
+    #cart {
+      position: absolute;
+      left: 20px;
+      top : 380px;
+    }
+
+    #control {
+      position: absolute;
+      left: 300px;
+      top: 380px;
+    }
+  </style>
+
+
+ <script type="text/javascript">
+    //update when input key is correct
+    var powerOn = false;
+
+    //orginal session for camera control
+    var session;
+
+    //additional session for data sharing
+    var dataSession;
+
+    //GPSdata
+    var sendingGPS = null;
+    var currLocation = {};
+
+    //for demo
+    var GPStableLat = [
+    33.769058,
+    33.769093,
+    33.768935,
+    33.768906,
+    33.768889,
+    33.768966,
+    33.770708,
+    33.771086,
+    33.771807,
+    33.77188,
+    33.771914,
+    33.771955,
+    33.772023,
+    33.772058,
+    33.772048,
+    33.771849];
+
+    var GPStableLng = [
+    -84.391386,
+    -84.391389,
+    -84.391696,
+    -84.391809,
+    -84.391917,
+    -84.392037,
+    -84.392109,
+    -84.392121,
+    -84.392088,
+    -84.391938,
+    -84.391901,
+    -84.391912,
+    -84.391925,
+    -84.391873,
+    -84.391846,
+    -84.3919
+    ];
+  </script>
+</head>
+
+
+<body>
+
+<p id="txt">Check the permission of cameras first before you go to the seperate link(V7)</p>
+
+<div id="audioSection" >
+  <div id="cart">
+    <p>Cart Audio</p>
+    <div id="cartAudio"></div>
+  </div>
+
+  <div id="control">
+    <p>Operator Audio</p>
+    <div id="controlAudio"></div>
+  </div>
+</div>   
+
+<div id="linkSection">
+  <!-- for version 7 -->
+  <p><a href="https://gatechmsl.com/motionDet10/cart/cameras/1stCamera.html">First Camera</a></p>
+  <p><a href="https://gatechmsl.com/motionDet10/cart/cameras/2ndCamera.html">Second Camera</a></p>
+  <p><a href="https://gatechmsl.com/motionDet10/cart/cameras/3rdCamera.html">Third Camera</a></p>
+  <p><a href="https://gatechmsl.com/motionDet10/cart/cameras/4thCamera.html">Forth Camera</a></p>
+</div>
+
+
+<script type="text/javascript">
+  //for data sharing
+  dataSession = OT.initSession(apiKey , dataId);
+/*
+  dataSession.on("signal:power", function(event) {
+    console.log("Signal sent from connection " + event.from.id);
+      if (event.data == true) {
+        if (!powerOn) {
+          powerOn = true;
+          console.log("Power On!");
+        } 
+      } else if (event.data == false) {
+        if (powerOn) {
+          powerOn = false;
+          console.log("Power Off!");
+        } 
+      }
+    });
+
+
+  //GET the Audio & Video Devices
+  var audioInputDevices;
+  var videoInputDevices;
+
+
+    //check for the operator's audio
+    dataSession.on('streamCreated', function(event) {
+      if (event.stream.name == "Control Audio") {
+        controlAudio = dataSession.subscribe(event.stream, 'controlAudio', function(error) {
+          console.log("control audio created!");
+        });
+      }
+    });
+
+    dataSession.on("streamDestroyed", function (event) {
+      event.preventDefault();
+      if (event.stream.name == "Control Audio") {
+        console.log("control audio destroyed!");
+      }
+    });
+*/
+    //connect to the data session
+    dataSession.connect(dataToken, function(error) {
+      //cartAudio = OT.initPublisher('cartAudio', {videoSource: null,name:'Cart Audio'},function(error) {
+      //  dataSession.publish(cartAudio); //Default publish the audio into the session
+      //});          
+    });
+	
+</script>
+
+<script type="text/javascript">
+
+  var currentLat; //// GPS data
+  var currentLng;
+
+</script>
+
+<script type="text/javascript">
+
+
+  function paramater(){
+		this.value=0;
+		this.tStamp=0;
+	};
+  
+  var Steering = new paramater();
+  var AccelInput = new paramater();
+  var BrakeInput = new paramater();
+  var FWD=new paramater();
+  var REV=new paramater();
+  var EMG=new paramater();
+  var STR=new paramater();
+
+  var socket = io();
+
+  var preSteering = 0;
+  var preAccelInput=0;
+  var preBrakeInput=0;
+  var preFWD=0;
+  var preREV=0;
+  var preEMG=0;
+  var preSTR=0;
+  
+  //////////////////
+	var CAMF=new paramater();
+	var CAMR=new paramater();
+	var CAML=new paramater();
+	var CAMPulse=new paramater();
+  
+	var preCAMF=0;
+	var preCAMR=0;
+	var preCAML=0;
+	var preCAMPulse=0;
+//////////////////////////
+
+
+  dataSession.on("signal", function(event) {
+
+    /////////////////////////////////////////////////Connection test
+
+    
+
+        if(event.type==="signal:ConnRanNum"){ 
+
+            ConnRanNum = event.data;
+
+                socket.emit('ConnRanNum', ConnRanNum);
+
+        }
+
+  /////////////////////////////////////////////////Connection test
+
+    
+      // Steering
+      
+      if(event.type==="signal:Steering"){ 
+
+        Steering = event.data;
+        if (preSteering==Steering.value){
+        } else {
+          socket.emit('Steering', Steering);
+          preSteering=Steering.value;
+        }
+      }
+      
+      // Acceleration
+      
+      if(event.type==="signal:AccelInput"){
+
+        AccelInput = event.data;
+        if (preAccelInput==AccelInput.value){
+        } else {
+
+          socket.emit('AccelInput', AccelInput);
+          preAccelInput=AccelInput.value;
+
+        }
+      } 
+      // Brake
+      
+      if(event.type==="signal:BrakeInput"){
+
+        BrakeInput = event.data;
+        if (preBrakeInput==BrakeInput.value){
+        } else {
+
+          socket.emit('BrakeInput', BrakeInput);
+          preBrakeInput=BrakeInput.value;
+
+        }
+      } 
+
+      // Forward (Button)
+      
+      if(event.type==="signal:FWD"){
+
+        FWD = event.data;
+        if (preFWD==FWD.value){
+        } else {
+
+          socket.emit('FWD', FWD);
+          preFWD=FWD.value;
+
+        }
+      } 
+      
+      // Reverse (Button)
+      
+      if(event.type==="signal:REV"){
+
+        REV = event.data;
+        if (preREV==REV.value){
+        } else {
+
+          socket.emit('REV', REV);
+          preREV=REV.value;
+
+        }
+      }     
+
+      // Emergency (Button)
+      
+      if(event.type==="signal:EMG"){
+
+        EMG = event.data;
+        if (preEMG==EMG.value){
+        } else {
+
+          socket.emit('EMG', EMG);
+          preEMG=EMG.value;
+
+        }
+      } 
+
+      // Start (Button)
+      
+      if(event.type==="signal:STR"){
+
+        STR = event.data;
+        if (preSTR==STR.value){
+        } else {
+
+          socket.emit('STR', STR);
+          preSTR=STR.value;
+
+        }
+      } 
+
+      if(event.type==="signal:CAMF"){
+
+        CAMF = event.data;
+        if (preCAMF==CAMF.value){
+        } else {
+
+          socket.emit('CAMF', CAMF);
+          preCAMF=CAMF.value;
+
+        }
+      } 
+	
+	  if(event.type==="signal:CAMR"){
+
+        CAMR = event.data;
+        if (preCAMR==CAMR.value){
+        } else {
+
+          socket.emit('CAMR', CAMR);
+          preCAMR=CAMR.value;
+
+        }
+      } 
+	
+	  if(event.type==="signal:CAML"){
+
+        CAML = event.data;
+        if (preCAML==CAML.value){
+        } else {
+
+          socket.emit('CAML', CAML);
+          preCAML=CAML.value;
+
+        }
+      } 
+	  
+	  if(event.type==="signal:CAMPulse"){
+
+        CAMPulse = event.data;
+        if (preCAMPulse==CAMPulse.value){
+        } else {
+
+          socket.emit('CAMPulse', CAMPulse);
+          preCAMPulse=CAMPulse.value;
+
+        }
+      } 
+	  
+	  
+	  if(event.type==="signal:TimeSyncR"){ //from operator to cart
+	  
+			socket.emit('TimeSyncR', event.data);
+		}
+	
+	});
+
+ /////////////////////////////////////////////receive values from control arduino/////////////////////////////////////////////
+
+ 
+
+   var SteeringAngle=0;
+
+   var SteeringDirection=0;
+
+ 
+
+    socket.on('SteeringAngle', function (data) { //receive steering angle from cart and store data
+
+          SteeringAngle=data;
+
+    });
+
+    socket.on('SteeringDirection', function (data) { //receive steering direction from cart and store data
+
+      SteeringDirection=data;
+
+      //var x = document.getElementById("txt");
+
+            //x.innerHTML = "receiving values: angle "+SteeringAngle+" direction "+SteeringDirection;
+
+    });
+
+    
+
+ /////////////////////////////////////////////END - receive values from control arduino/////////////////////////////////////////////  
+
+ 
+
+  /////////////////////////////////////////////receive values from sensor arduino & GPS/////////////////////////////////////////////
+
+  
+
+    var CartSpeed=0;
+
+  
+
+    socket.on('CartSpeed', function (data) { //receive steering angle from cart and store data
+
+          CartSpeed=data;
+
+          dataSession.signal(
+            {
+              data: CartSpeed,
+              type: "cartSpeed"
+            },
+
+            function(error) {
+               if (error) {
+                  console.log("signal error ("
+                              + error.code
+                              + "): " + error.message);
+              } else {
+                  console.log("sending cart speed " + CartSpeed );
+              } 
+            }                      
+          );
+    });
+
+    
+
+  var LIDATA=0;
+
+  
+
+    socket.on('LIDATA', function (data) { //receive lidar data. Formatted as a string with NNNN:DDD. NNNN=distance ; DDD=degree. updates as fast as possible
+
+          LIDATA=data;
+
+          var lidarStrings = LIDATA.split(":");
+
+          var liData = {
+          distance: parseInt(lidarStrings[0]),
+          degree: parseInt(lidarStrings[1])
+        };
+        dataSession.signal(
+          {
+            data: liData,
+            type: "liData"
+          },
+
+          function(error) {
+             if (error) {
+                console.log("signal error ("
+                            + error.code
+                            + "): " + error.message);
+            } else {
+                console.log("sending current liData " + liData.distance + " " + liData.degree);
+            } 
+          }                      
+        );        
+    });
+
+
+
+
+    socket.on('GPSLatt', function (data) { //receive GPS data. Formatted as a string -> latitude + ',' + longitude.
+    
+    currentLat = data;
+        //console.log("latitude" + currentLat);
+    }); 
+
+  socket.on('GPSLong', function (data) { //receive GPS data. Formatted as a string -> latitude + ',' + longitude.
+    
+    currentLng = data;
+        //console.log("longitud" + currentLng);
+    }); 
+  
+      var sendingGPS = setInterval(function() {
+        // GPStableLat.push(currentLat);
+        // GPStableLng.push(currentLng);
+        var currentLocation = {
+          lat: parseFloat(currentLat),
+          lng: parseFloat(currentLng)
+        };
+        dataSession.signal(
+          {
+            data: currentLocation,
+            type: "gpsData"
+          },
+
+          function(error) {
+             if (error) {
+                console.log("signal error ("
+                            + error.code
+                            + "): " + error.message);
+            } else {
+                console.log("sending current location " + currentLat + " " + currentLng);
+            } 
+          }                      
+        );
+
+      }, 1000);
+  
+
+  /////////////////////////////////////////////END - receive values from sensor arduino & GPS/////////////////////////////////////////////
+    
+	socket.on('TimeSync', function (data) { //send timesync from cart to operator
+
+        dataSession.signal(
+            {
+              data: data,
+              type: "TimeSync"
+            },
+
+            function(error) {
+               if (error) {
+                  console.log("signal error ("
+                              + error.code
+                              + "): " + error.message);
+              } else {
+                  console.log("sending TimeSync ");
+              } 
+            }                      
+          );
+    });
+  
+  session.on('disconnect', function() {
+    console.log('Connection closed');
+  });
+
+  dataSession.on('disconnect', function() {
+    console.log('Data Connection closed');
+  });
+</script>
+
+</body>
+</html>
