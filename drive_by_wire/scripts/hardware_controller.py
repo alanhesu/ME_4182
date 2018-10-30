@@ -20,7 +20,7 @@ def callback_keyboard(data):
 
 def callback_odom(data):
     global vel_curr
-    vel_curr = data.twist.Twist
+    vel_curr = data.twist.twist
     stamp = data.header.stamp.secs + data.header.stamp.nsecs/1000000000
 
 
@@ -43,15 +43,16 @@ ki = 0
 def hardware_controller():
     global stamp, prev, accum, kp, kd, ki
     while not rospy.is_shutdown():
-        error = vel_setp.linear.x - vel_curr.linear.x
-        elapsed = stamp - prev
-        if elapsed == 0:
-            rospy.loginfo("elapsed time is zero!")
-            continue
-        accum += error
+        # error = vel_setp.linear.x - vel_curr.linear.x
+        # elapsed = stamp - prev
+        # if elapsed == 0:
+        #     rospy.loginfo("elapsed time is zero!")
+        #     continue
+        # accum += error
 
-        val.throttle = kp*error + kd*error/elapsed + ki*accum
-        prev = stamp
+        # val.throttle = kp*error + kd*error/elapsed + ki*accum
+        # prev = stamp
+        val.throttle = vel_setp.linear.x
         pub.publish(val)
         rate.sleep()
 
