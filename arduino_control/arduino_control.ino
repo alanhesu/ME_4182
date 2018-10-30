@@ -16,7 +16,7 @@ int reading=0;
 int prereading=0;
 int HallVolt=0;
 int preHall=1;
-int SpeedSensorPin=A1; 
+int SpeedSensorPin=2; 
 int COUNT=0;
 
 
@@ -54,7 +54,7 @@ void setup() {
   nh.subscribe(sub);
   nh.advertise(pub_hall);
 
-  Serial.begin(9600);
+//  Serial.begin(9600);
 }
 
 void loop() {
@@ -66,7 +66,7 @@ void loop() {
     tick_msg.data = true;
     pub_hall.publish(&tick_msg);
     preHall=0;
-    Serial.write("tick");
+//    Serial.write("tick");
     
   //} else {
   } else if (HallVolt>800){

@@ -31,6 +31,7 @@ def hall_interpreter():
             odom.header.stamp.nsecs = (curr_time - math.floor(curr_time))*1000000000
             odom.twist.twist.linear.x = vel
             pub.publish(odom)
+            rospy.loginfo(count)
         rate.sleep()
 
 if __name__ == '__main__':
