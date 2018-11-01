@@ -1,6 +1,8 @@
+#include <LTC2944.h>
 #include <ros.h>
 #include <drive_by_wire/Cart_values.h>
 #include <std_msgs/Bool.h>
+
 
 ros::NodeHandle nh;
 float pedalVoltage;

@@ -4,5 +4,5 @@
   <node pkg="drive_by_wire" name="keyboard_input" type="keyboard_input.py" output="screen"> </node>
   <node pkg="drive_by_wire" name="hardware_controller" type="hardware_controller.py" output="screen"> </node>
   <node pkg="drive_by_wire" name="hall_interpreter" type="hall_interpreter.py" output="screen"> </node>
-  <node pkg="rosserial_python" name="serial_node" type="serial_node.py" args="/dev/ttyS0"> </node>
+  <node pkg="rosserial_python" name="serial_node" type="serial_node.py" args="/dev/ttyACM0"> </node>
 </launch>
