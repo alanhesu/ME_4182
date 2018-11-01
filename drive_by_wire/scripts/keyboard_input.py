@@ -12,7 +12,7 @@ vel_msg = Twist()
 vel_max_linear = 5
 min_turn_radius = 3
 vel_max_angular = vel_max_linear * min_turn_radius
-vel_linear_inc = .5
+vel_linear_inc = 3
 vel_angular_inc = .1
 
 def keyboard_input():
