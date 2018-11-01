@@ -52,12 +52,12 @@ void setup() {
   pinMode(pedal, OUTPUT);
   pinMode(brake, OUTPUT);
   pinMode(pedalSwitch, OUTPUT);
+  Serial.begin(57600);
   // pinMode(SpeedSensorPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   attachInterrupt(digitalPinToInterrupt(SpeedSensorPin), tick, CHANGE);
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
-//  Serial.begin(9600);
 }
 
 void loop() {
@@ -80,5 +80,6 @@ void loop() {
 }
 
 void tick() {
+  Serial.println("tick");
   HallVolt = !HallVolt;
 }
