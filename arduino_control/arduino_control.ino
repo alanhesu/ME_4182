@@ -14,9 +14,9 @@ std_msgs::Bool tick_msg;
 ros::Publisher pub_hall("tick", &tick_msg);
 int reading=0;
 int prereading=0;
-int HallVolt=0;
+volatile int HallVolt=0;
 int preHall=1;
-int SpeedSensorPin=2; 
+int SpeedSensorPin=2;
 int COUNT=0;
 
 
@@ -30,7 +30,7 @@ void callback(const drive_by_wire::Cart_values& data) {
 //    digitalWrite(pedalSwitch, LOW);
 //  }
 //  analogWrite(pedal, pedalVoltage*51);
-//  analogWrite(brake, brakeVoltage*51);  
+//  analogWrite(brake, brakeVoltage*51);
   if (data.throttle > 0) {
     digitalWrite(pedalSwitch, HIGH);
     analogWrite(pedal, data.throttle*51);
@@ -50,7 +50,8 @@ void setup() {
   pinMode(pedal, OUTPUT);
   pinMode(brake, OUTPUT);
   pinMode(pedalSwitch, OUTPUT);
-  pinMode(SpeedSensorPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  // pinMode(SpeedSensorPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  attachInterrupt(digitalPinToInterrupt(SpeedSensorPin), tick, CHANGE);
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
@@ -59,7 +60,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  HallVolt=digitalRead(SpeedSensorPin);
 
   if ((!HallVolt) && (preHall==1)) {
     COUNT+=1;
@@ -68,11 +68,15 @@ void loop() {
     preHall=0;
 //    Serial.write("tick");
 //    nh.loginfo(COUNT);
-    
-  //} else { 
+
+  //} else {
   } else if (HallVolt){
     preHall=1;
   }
   nh.spinOnce();
   delay(1);
+}
+
+void tick() {
+  HallVolt = !HallVolt;
 }
