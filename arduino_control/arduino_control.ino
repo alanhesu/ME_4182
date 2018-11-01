@@ -35,6 +35,7 @@ void callback(const drive_by_wire::Cart_values& data) {
     digitalWrite(pedalSwitch, HIGH);
     analogWrite(pedal, data.throttle*51);
   } else if (data.throttle < 0) {
+    digitalWrite(pedal, 0);
     digitalWrite(pedalSwitch, LOW);
     analogWrite(brake, brakeVoltage*51);
   } else {
@@ -53,23 +54,23 @@ void setup() {
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
-
 //  Serial.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  HallVolt=analogRead(SpeedSensorPin);
-  
-  if ((HallVolt < 50) && (preHall==1)) {
+  HallVolt=digitalRead(SpeedSensorPin);
+
+  if ((!HallVolt) && (preHall==1)) {
     COUNT+=1;
     tick_msg.data = true;
     pub_hall.publish(&tick_msg);
     preHall=0;
 //    Serial.write("tick");
+//    nh.loginfo(COUNT);
     
-  //} else {
-  } else if (HallVolt>800){
+  //} else { 
+  } else if (HallVolt){
     preHall=1;
   }
   nh.spinOnce();
