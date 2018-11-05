@@ -23,6 +23,19 @@ def callback_odom(data):
     vel_curr = data.twist.twist
     stamp = data.header.stamp.to_sec()
 
+def vel_pid():
+    global stamp, prev, accum, kp, kd, ki, val
+    error = vel_setp.linear.x - vel_curr.linear.x
+    elapsed = stamp - prev
+    if elapsed == 0:
+        # rospy.loginfo("elapsed time is zero!")
+        return
+    accum += error
+
+    val.throttle = kp*error + kd*error/elapsed + ki*accum
+    prev = stamp
+    # val.throttle = vel_setp.linear.x
+    rospy.loginfo(val.throttle)
 
 pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
 rospy.init_node('hardware_controller', anonymous=True)
@@ -41,20 +54,9 @@ kd = 2
 ki = .1
 
 def hardware_controller():
-    global stamp, prev, accum, kp, kd, ki
     while not rospy.is_shutdown():
-        error = vel_setp.linear.x - vel_curr.linear.x
-        elapsed = stamp - prev
-        if elapsed == 0:
-            # rospy.loginfo("elapsed time is zero!")
-            continue
-        accum += error
-
-        val.throttle = kp*error + kd*error/elapsed + ki*accum
-        prev = stamp
-        # val.throttle = vel_setp.linear.x   
+        vel_pid()
         pub.publish(val)
-        rospy.loginfo(val.throttle)
         rate.sleep()
 
 if __name__ == '__main__':
