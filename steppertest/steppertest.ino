@@ -1,4 +1,5 @@
 #include <Stepper.h>
+#include <Encoder.h>
 
 /////////////////////////////////////////////////////////////////////////////////
 // STEPPER
@@ -7,73 +8,63 @@ const int stepsPerRevolution = 200;  // change this to fit the number of steps p
 // for your motor
 
 // initialize the stepper library on pins:
-Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
+Stepper myStepper(stepsPerRevolution, 31, 33, 35, 37);
 
 // Stepper Variables
 const int counts_p_rev = 1600;
 
+// ENCODER INPUTS
+// Encoder Input Pins
+int EncAPin = 3; //interrupt 4 (blue wire)
+int EncBPin = 2; //interrupt 5 (green wire)
+int EncIndPin = 21; //interrupt 2
+
+// Initialize the encoder library on interrupt pins:
+Encoder myEnc(EncAPin, EncBPin);
+
+// CALCULATION VARIABLES
+long oldPosition = -999;
+long newPosition = 0;
+int errPos = 0;
+
+// Calculation Variables
+int newPos = -100; // Variable for scaled wheel desired position
+int actPos = 0;
+int oldpos = 0;
+
+volatile int index = 0;
+
+void indec() {
+  index = digitalRead(EncIndPin);
+}
+
+int countSteps = 0;
+
 void setup() {
   // put your setup code here, to run once:
+  pinMode(EncAPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  pinMode(EncBPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  pinMode(EncIndPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  attachInterrupt(2, indec, CHANGE); // Encoder Index ------- interrupt 2, pin 21
   myStepper.setSpeed(175);
-  myStepper.step(30);
+//  myStepper.step(150);
+
+  Serial.begin(9600);
 }
 
 void loop() {
-  /*
-  // put your main code here, to run repeatedly:
-  //////////////////////////////////////////////////////////////////////////////////////
-  // STEERING LOOP
-
-  // Read the interrupts:
-  wheelVal = pwm_value3;
-  //analogPin=0;
-  //Firmata.sendAnalog(analogPin, pwm_value3); //send value of steering position in micros (should be between 1000 and 2000 micros
-  wheelDir = digitalRead(WheelDirPin);
-
-  // Read the Encoder interrupts:
+   // Read the Encoder interrupts:
   long newPosition = myEnc.read();
-  if (newPosition != oldPosition) {
-    oldPosition = newPosition;
-    //Firmata.sendAnalog(0, newPosition);
-    //Firmata.sendAnalog(0, 0000);
-    //Firmata.sendAnalog(0, millis());
-  }
-  actPos = map(oldPosition, 0, 7500, 0, counts_p_rev);
-  newPos = map(wheelVal, 0, 255, 0, counts_p_rev);
-    
-  //if (actPos !=oldpos){  ////////////// chech value of actPos and newPos in console
-    //Firmata.sendAnalog(0, actPos);
-    //Firmata.sendAnalog(1, newPos);
-    //oldpos=actPos;
-  //}
-  
-  if (wheelDir == HIGH) {
-    newPos = -newPos;
-  }
+  Serial.println(newPosition);
+  actPos = newPosition;
 
   errPos = newPos - actPos;
-  if (errPos < -20) {
-    myStepper.step(30);
+  if (errPos < -40) {
+    myStepper.step(-7);
     //Firmata.sendAnalog(0, errPos); ////////////////////// check error value in cosole
   }
-  else if (errPos > 20) {
-    myStepper.step(-30);
+  else if (errPos > 40) {
+    myStepper.step(7);
     //Firmata.sendAnalog(1, errPos); ////////////////////// check error value in cosole
   }
-  
-  //Steering Wheel feedback for useability meetering ///////////////////////////////////////////////////////
-  //nowMillis = millis();
-  //sampInt=50;
-  if (abs(actPos - oldpos)> 10) {
-    oldpos=actPos;  
-    if (actPos>=0){
-      Firmata.sendAnalog(0, actPos);
-      Firmata.sendAnalog(1, 1); // determine if actPos HIGH is right or left
-    }else{
-      Firmata.sendAnalog(0, -1*actPos);
-      Firmata.sendAnalog(1, 0); // determine if actPos LOW is right or left
-    }
-  }
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  */
 }
