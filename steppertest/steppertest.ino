@@ -28,7 +28,7 @@ long newPosition = 0;
 int errPos = 0;
 
 // Calculation Variables
-int newPos = -100; // Variable for scaled wheel desired position
+int newPos = 8000; // Variable for scaled wheel desired position
 int actPos = 0;
 int oldpos = 0;
 
@@ -47,7 +47,7 @@ void setup() {
   pinMode(EncIndPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   attachInterrupt(2, indec, CHANGE); // Encoder Index ------- interrupt 2, pin 21
   myStepper.setSpeed(175);
-//  myStepper.step(150);
+//  myStepper.step(-150);
 
   Serial.begin(9600);
 }
@@ -66,5 +66,5 @@ void loop() {
   else if (errPos > 40) {
     myStepper.step(7);
     //Firmata.sendAnalog(1, errPos); ////////////////////// check error value in cosole
-  }
+  }  
 }
