@@ -18,7 +18,7 @@ def callback_keyboard(data):
     #     val.steering_angle = 0
     # rospy.loginfo(val.steering_angle)
 
-def callback_odom(data):
+def callback_encoder(data):
     global vel_curr, stamp
     vel_curr = data.twist.twist
     stamp = data.header.stamp.to_sec()
@@ -35,12 +35,11 @@ def vel_pid():
     val.throttle = kp*error + kd*error/elapsed + ki*accum
     prev = stamp
     # val.throttle = vel_setp.linear.x
-    rospy.loginfo(val.throttle)
 
 pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
 rospy.init_node('hardware_controller', anonymous=True)
 rospy.Subscriber("keyboard", Twist, callback_keyboard)
-rospy.Subscriber("odom", Odometry, callback_odom)
+rospy.Subscriber("odom", Odometry, callback_encoder)
 rate = rospy.Rate(10)
 val = Cart_values()
 vel_setp = Twist()
