@@ -1,3 +1,3 @@
 float32 throttle
-int32 steering_angle
+float32 steering_angle
 float32 brake

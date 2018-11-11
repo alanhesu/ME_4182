@@ -1,3 +1,12 @@
+# Hardware PID
+kp_vel: 5
+ki_vel: .2
+kd_vel: .5
+
+kp_turn: 1
+ki_turn: 0
+kd_turn: 0
+
 # roll, pitch, yaw
 # float[9]
 imu_orientation_covariance: [0, 0, 0,

@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 
 pub = rospy.Publisher('keyboard', Twist, queue_size=10)
 rospy.init_node('keyboard_input', anonymous=True)
-rate = rospy.Rate(10) # 10hz
+rate = rospy.Rate(30) # 10hz
 vel_msg = Twist()
 vel_max_linear = 5
 min_turn_radius = 3
