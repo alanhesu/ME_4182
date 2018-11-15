@@ -29,7 +29,7 @@ void Cart::setCartNeutral() {
     OPEN_RELAY(REVERSE_RELAY);
 }
 
-void Cart::cartShutdown() {
+void Cart::driveShutdown() {
     OPEN_RELAY(IGNITION_RELAY);
     delay(2000);
     OPEN_RELAY(EMERGENCY_RELAY);

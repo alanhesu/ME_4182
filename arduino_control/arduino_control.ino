@@ -2,9 +2,12 @@
 #include <ros.h>
 #include <drive_by_wire/Cart_values.h>
 #include <std_msgs/Bool.h>
-#include <Cart.h>
+#include "Cart/Cart.h"
 #include <ros/time.h>
+#include <Stepper.h>
+#include <Encoder.h>
 
+// State machine
 enum State {off, start1, start2, start3, rest, pedal1, pedal2, pedal3, brake1};
 State state;
 ros::Time prevTime;
@@ -15,9 +18,6 @@ ros::NodeHandle nh;
 float pedalVoltage = 0;
 float steeringVoltage = 0;
 float brakeVoltage = 0;
-int pedal = 5;
-int brake = 6;
-int pedalSwitch = 7;
 
 // Wheel encoder
 std_msgs::Bool tick_msg;
@@ -26,26 +26,63 @@ int reading=0;
 int prereading=0;
 volatile int HallVolt=0;
 int preHall=1;
-int SpeedSensorPin=2;
 int COUNT=0;
 
+/////////////////////////////////////////////////////////////////////////////////
+// STEPPER
+// List Stepper Constants
+const int stepsPerRevolution = 200;
+// for your motor
+
+// initialize the stepper library on pins:
+Stepper myStepper(stepsPerRevolution, ST_4, ST_3, ST_2, ST_1);
+
+// Stepper Variables
+const int counts_p_rev = 1600;
+
+// Initialize the encoder library on interrupt pins:
+Encoder myEnc(STE_2, STE_1);
+
+// CALCULATION VARIABLES
+long oldPosition = -999;
+long newPosition = 0;
+int errPos = 0;
+
+// Calculation Variables
+int newPos = 0; // Variable for scaled wheel desired position
+int actPos = 0;
+int oldpos = 0;
+
+volatile int index = 0;
+
+void indec() {
+  index = digitalRead(STE_3);
+}
 
 void callback(const drive_by_wire::Cart_values& data) {
   pedalVoltage = data.throttle;
   steeringVoltage = data.steering_angle;
+  newPos = steeringVoltage; // Set these equal to each other for now
   brakeVoltage = data.brake;
 }
 
 ros::Subscriber<drive_by_wire::Cart_values> sub("Arduino_commands", &callback);
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(pedal, OUTPUT);
-  pinMode(brake, OUTPUT);
-  pinMode(pedalSwitch, OUTPUT);
-  Serial.begin(57600);
-  // pinMode(SpeedSensorPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
-  attachInterrupt(digitalPinToInterrupt(SpeedSensorPin), tick, CHANGE);
+  // Pedal and brake
+  pinMode(ACCEL, OUTPUT);
+  pinMode(BRAKE, OUTPUT);    
+
+  // Wheel encoder
+  attachInterrupt(digitalPinToInterrupt(HALL_SENSOR), tick, CHANGE);
+
+  // Stepper motor
+  pinMode(STE_1, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  pinMode(STE_2, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  pinMode(STE_3, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
+  attachInterrupt(STE_3, indec, CHANGE); // Wait hold on.. they attached it to EncpinB (pin2) originally...
+  myStepper.setSpeed(175);
+  
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
@@ -117,23 +154,33 @@ void loop() {
       }
   }
 
+  // Wheel encoder
   if ((!HallVolt) && (preHall==1)) {
     COUNT+=1;
     tick_msg.data = true;
     pub_hall.publish(&tick_msg);
-    preHall=0;
-//    Serial.write("tick");
-//    nh.loginfo(COUNT);
-
-  //} else {
+    preHall=0;  
   } else if (HallVolt){
     preHall=1;
   }
+
+  // Stepper
+  // Read the Encoder interrupts:
+  long newPosition = myEnc.read();  
+  actPos = newPosition;
+
+  errPos = newPos - actPos;
+  if (errPos < -40) {
+    myStepper.step(-7);    
+  }
+  else if (errPos > 40) {
+    myStepper.step(7);    
+  }  
+  
   nh.spinOnce();
   delay(1);
 }
 
-void tick() {
-  Serial.println("tick");
+void tick() {  
   HallVolt = !HallVolt;
 }
