@@ -9,13 +9,20 @@ class Pid:
         self.kd = kd
         self.stamp = 0
         self.accum = 0
-        self.prev = 0
+        self.t_prev = 0
+        self.e_prev = 0
+        self.pid_prev = 0
 
     def pid(self, curr, setp, stamp):
-        error = setp - curr
-        elapsed = self.stamp - self.prev
+        elapsed = stamp - self.t_prev
         if elapsed == 0:
-            return
-        self.accum += error
-        self.prev = self.stamp
-        return kp*error + kd*error/elapsed + ki*accum
+            return self.pid_prev
+        error = setp - curr
+        de = (error - self.e_prev)/elapsed
+        ie = (error + self.e_prev) * elapsed / 2
+
+        self.accum += ie
+        self.t_prev = stamp
+        self.e_prev = error
+        self.pid_prev = kp*error + kd*de + ki*self.accum
+        return self.pid_prev
