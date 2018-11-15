@@ -39,8 +39,8 @@ def hall_interpreter():
         vel = rps*wheel_radius*2*math.pi
         wheel_encoder.header.stamp = rospy.Time.now()
         wheel_encoder.twist.twist.linear.x = vel
-        vel_dumb += .05
-        wheel_encoder.twist.twist.linear.x = vel_dumb
+        #vel_dumb += .05
+        #wheel_encoder.twist.twist.linear.x = vel_dumb
         count = 0
         pub.publish(wheel_encoder)
         rate.sleep()
