@@ -24,5 +24,5 @@ class Pid:
         self.accum += ie
         self.t_prev = stamp
         self.e_prev = error
-        self.pid_prev = kp*error + kd*de + ki*self.accum
+        self.pid_prev = self.kp*error + self.kd*de + self.ki*self.accum
         return self.pid_prev

@@ -2,9 +2,9 @@
 
 <launch>
   <rosparam command="load" file="$(find drive_by_wire)/params/drive_by_wire.yaml" />
-  <node pkg="tf" type="static_transform_publisher" name="gps_broadcaster" args="0 2 0 0 0 0 1 base_cart gps 100" />
-  <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 2 0 0 0 0 1 base_cart imu 100" />
-  <node pkg="tf" type="static_transform_publisher" name="lidar_broadcaster" args="0 2 0 0 0 0 1 base_cart lidar 100" />
+  <node pkg="tf" type="static_transform_publisher" name="gps_broadcaster" args="0 2 0 0 0 0 1 base_link gps 100" />
+  <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 2 0 0 0 0 1 base_link imu 100" />
+  <node pkg="tf" type="static_transform_publisher" name="lidar_broadcaster" args="0 2 0 0 0 0 1 base_link lidar 100" />
   <node pkg="drive_by_wire" name="keyboard_input" type="keyboard_input.py" output="screen"> </node>
   <node pkg="drive_by_wire" name="hardware_controller" type="hardware_controller.py" output="screen"> </node>
     <remap from="odometry/filtered" to="odom"/>
