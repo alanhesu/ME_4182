@@ -1,0 +1,12 @@
+  pinMode(29,OUTPUT);
+  delay(2000);
+  pinMode(27,OUTPUT);
+  delay(500);
+  pinMode(23,OUTPUT);
+  delay(5000);
+  pinMode(24,OUTPUT);
+  analogWrite(6,0);
+  pinMode(22,OUTPUT);
+  analogWrite(5,0);
+  delay(5000);
+  pinMode(26,OUTPUT);

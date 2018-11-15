@@ -8,18 +8,18 @@
 #define	FORWARD_RELAY 23 //If closed, cart drives in Forward mode
 #define REVERSE_RELAY 25 //If closed, cart drives in Reverse mode
 //If neither the Forward or Reverse relays are closed, but both the Emergency relay and ignition are closed, the cart is in neutral
-#define ACCEL_FAILSAFE 24 //Switch for acceleration pedal. In order to send acceleration signal without faulting, this must be closed before signaling
-#define BRAKE_FULLSTOP 22 //Switch for brake pedal. Closing this WHILE the brake signal is >3.5V signals a full-stop
-#define ACCEL_ENCODER_ENABLE 26 //Switch for swapping to spoofed accel signal in. These should simply be closed upon autonomous mode start
-#define BRAKE_ENCODER_ENABLE 28 //Switch for swapping to spoofed brake signal in. These should simply be closed upon autonomous mode start
+#define ACCEL_FAILSAFE 26 //Switch for acceleration pedal. In order to send acceleration signal without faulting, this must be closed before signaling
+#define BRAKE_FULLSTOP 28 //Switch for brake pedal. Closing this WHILE the brake signal is >3.5V signals a full-stop
+#define ACCEL_ENCODER_ENABLE 24 //Switch for swapping to spoofed accel signal in. These should simply be closed upon autonomous mode start
+#define BRAKE_ENCODER_ENABLE 22 //Switch for swapping to spoofed brake signal in. These should simply be closed upon autonomous mode start
 #define CLOSE_RELAY(x) (pinMode(x,OUTPUT))
 #define OPEN_RELAY(x) (pinMode(x,INPUT))
 #define SWITCHING_TIME 5
 #define PEDAL_DELAY 0
 
 /*Accel & Brake signal definitions*/
-#define ACCEL 5
-#define BRAKE 6
+#define ACCEL 6
+#define BRAKE 5
 #define SPOOF_SCALE (float(4)*170/float(5))
 
 
