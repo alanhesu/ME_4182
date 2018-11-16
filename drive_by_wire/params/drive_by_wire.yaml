@@ -1,7 +1,7 @@
 # Hardware PID
 kp_vel: 5
-ki_vel: .2
-kd_vel: .5
+ki_vel: 0
+kd_vel: 0
 
 kp_turn: 1
 ki_turn: 0
