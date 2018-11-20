@@ -6,7 +6,7 @@ frequency: 30
 # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
 # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
 # filter will generate new output. Defaults to 1 / frequency if not specified.
-sensor_timeout: 0.1
+sensor_timeout: .1
 
 # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is
 # set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar
@@ -83,15 +83,12 @@ imu0_config: [false, false, false,
               true,  true,  true,
               true,  true,  true]
 imu0_nodelay: false
-imu0_differential: false
+imu0_differential: true
 imu0_relative: true
-imu0_queue_size: 5
-imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-imu0_twist_rejection_threshold: 0.8                #
-imu0_linear_acceleration_rejection_threshold: 0.8  #
+imu0_queue_size: 10
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
-# this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
+# this to true, and *make subjectre* your data conforms to REP-103, specifically, that the data is in ENU frame.
 imu0_remove_gravitational_acceleration: true
 
 # [ADVANCED]  The EKF and UKF models follow a standard predict/correct cycle. During prediction, if there is no
