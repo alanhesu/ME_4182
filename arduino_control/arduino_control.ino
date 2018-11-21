@@ -90,6 +90,19 @@ void setup() {
 
   state = off;  
   prevTime = nh.now();
+
+  pinMode(EMERGENCY_RELAY,OUTPUT); // Emergency relay
+  delay(2000);
+  pinMode(IGNITION_RELAY,OUTPUT);
+  delay(500);
+  pinMode(FORWARD_RELAY,OUTPUT);
+  delay(5000);
+  pinMode(ACCEL_ENCODER_ENABLE,OUTPUT);
+  analogWrite(6,0); // set accel voltage as 0
+  pinMode(BRAKE_ENCODER_ENABLE,OUTPUT);
+  analogWrite(5,0); // set brake voltage as 0
+  delay(5000);
+  pinMode(26,OUTPUT);
 }
 
 void loop() {
@@ -100,23 +113,23 @@ void loop() {
       prevTime = nh.now();
       break;
     case start1:
-      CLOSE_RELAY(EMERGENCY_RELAY);
-      CLOSE_RELAY(ACCEL_ENCODER_ENABLE);
-      CLOSE_RELAY(BRAKE_ENCODER_ENABLE);
+//      CLOSE_RELAY(EMERGENCY_RELAY);
+//      CLOSE_RELAY(ACCEL_ENCODER_ENABLE);
+//      CLOSE_RELAY(BRAKE_ENCODER_ENABLE);
       if (nh.now().toSec() - prevTime.toSec() >= SWITCHING_TIME/1000) {
         prevTime = nh.now();
         state = start2;       
       }
       break;
     case start2:
-      CLOSE_RELAY(IGNITION_RELAY);
+//      CLOSE_RELAY(IGNITION_RELAY);
       if (nh.now().toSec() - prevTime.toSec() >= 2) {
         prevTime = nh.now();
         state = start3;
       }
       break;
     case start3:
-      CLOSE_RELAY(FORWARD_RELAY);
+//      CLOSE_RELAY(FORWARD_RELAY);
       state = rest;
       break;
      case rest:
@@ -139,7 +152,7 @@ void loop() {
         state = pedal3;
       } else {
         fitted = .0487*pow(pedalVoltage,3) - .5527*pow(pedalVoltage,2) + 2.3975*pedalVoltage - 1.4343;
-        analogWrite(ACCEL, constrain(fitted, .7, 5.7)*51);
+        analogWrite(ACCEL, constrain(fitted, .7, 5)*51);
         state = pedal2;
       }
       break;
@@ -152,7 +165,7 @@ void loop() {
         state = rest;
       } else {
         fitted = .0487*pow(pedalVoltage,3) - .5527*pow(pedalVoltage,2) + 2.3975*pedalVoltage - 1.4343;
-        analogWrite(BRAKE, -1*constrain(fitted, .7, 5.7)*51);
+        analogWrite(BRAKE, -1*constrain(fitted, .7, 5)*51);
         state = brake1;
       }
   }
