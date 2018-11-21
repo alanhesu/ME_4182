@@ -109,7 +109,7 @@ void loop() {
   // State machine
   switch(state) {
     case off:
-      state = start1;
+      state = rest;
       prevTime = nh.now();
       break;
     case start1:

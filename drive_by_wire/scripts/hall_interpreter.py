@@ -11,6 +11,7 @@ def callback_tick(data):
         count = count + 1
         elapsed_time_tick = rospy.get_time() - prev_time_tick
         prev_time_tick = rospy.get_time()
+        rospy.loginfo('tick')
 
 
 pub = rospy.Publisher('twist0', TwistWithCovarianceStamped, queue_size=10)
