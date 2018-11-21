@@ -1,14 +1,14 @@
 # Dumb plan
 # Every three numbers sets a motion for a period in time and is executed sequentially:
 # [linear velocity, angular velocity, duration (seconds)]
-dumb_plan: [0, 0, 15,
-            3, 0, 10,
+dumb_plan: [0, 0, 10,
+            2, 0, 5,
             0, 0, 1]
 
 # Hardware PID
-kp_vel: 2
-ki_vel: 0
-kd_vel: 0
+kp_vel: 16
+ki_vel: .7
+kd_vel: 3
 
 kp_turn: 1
 ki_turn: 0
@@ -34,7 +34,7 @@ imu_linear_acceleration_covariance: [0, 0, 0,
 
 # x, y, z, roll, pitch, yaw
 # float[36]
-twist0_covariance: [.5, 0, 0, 0, 0, 0,
+twist0_covariance: [2, 0, 0, 0, 0, 0,
                     0, .5, 0, 0, 0, 0,
                     0, 0, .5, 0, 0, 0,
                     0, 0, 0, .5, 0, 0,
