@@ -9,14 +9,16 @@
 
   <arg name="razor_config_file" default="$(find drive_by_wire)/params/razor.yaml"/>
   <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
-    <rosparam file="$(arg razor_config_file)" command="load"/>    
+    <rosparam file="$(arg razor_config_file)" command="load"/>
   </node>
 
   <node pkg="drive_by_wire" name="keyboard_input" type="keyboard_input.py" output="screen"> </node>
   <node pkg="drive_by_wire" name="hardware_controller" type="hardware_controller.py" output="screen"> </node>
     <remap from="odometry/filtered" to="odom"/>
   <node pkg="drive_by_wire" name="hall_interpreter" type="hall_interpreter.py" output="screen"> </node>
-  <node pkg="rosserial_python" name="serial_node" type="serial_node.py" args="/dev/ttyACM1"> </node>     
+  <node pkg="drive_by_wire" name="dumb_navigation_planner" type="dumb_navigation_planner.py" output="screen"> </node>
+
+  <node pkg="rosserial_python" name="serial_node" type="serial_node.py" args="/dev/ttyACM1"> </node>
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_continuous" clear_params="true">
     <rosparam command="load" file="$(find drive_by_wire)/params/ekf_continuous.yaml" />
