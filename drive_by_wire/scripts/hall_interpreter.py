@@ -11,6 +11,7 @@ def callback_tick(data):
         count = count + 1
         elapsed_time_tick = rospy.get_time() - prev_time_tick
         prev_time_tick = rospy.get_time()
+        rospy.loginfo('tick')
 
 
 pub = rospy.Publisher('twist0', TwistWithCovarianceStamped, queue_size=10)
@@ -35,13 +36,13 @@ def hall_interpreter():
     while not rospy.is_shutdown():
         if elapsed_time_tick == 0:
             rps = 0
+        elif count == 0 and rospy.get_time() - prev_time_tick > elapsed_time_tick:
+            rps = .25/(rospy.get_time() - prev_time_tick)
         else:
             rps = .25/elapsed_time_tick # 4 ticks per revolution
         vel = rps*wheel_radius*2*math.pi
         wheel_encoder.header.stamp = rospy.Time.now()
-        wheel_encoder.twist.twist.linear.x = vel
-        #vel_dumb += .05
-        #wheel_encoder.twist.twist.linear.x = vel_dumb
+        wheel_encoder.twist.twist.linear.x = vel        
         count = 0
         pub.publish(wheel_encoder)
         rate.sleep()
