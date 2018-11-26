@@ -1,7 +1,7 @@
 #include <LTC2944.h>
 #include <ros.h>
 #include <drive_by_wire/Cart_values.h>
-#include <std_msgs/Bool.h>
+#include <std_msgs/Int32.h>
 #include "Cart/Cart.h"
 #include <ros/time.h>
 #include <Stepper.h>
@@ -21,13 +21,15 @@ float brakeVoltage = 0;
 float fitted;
 
 // Wheel encoder
-std_msgs::Bool tick_msg;
+std_msgs::Int32 tick_msg;
 ros::Publisher pub_hall("tick", &tick_msg);
 int reading=0;
 int prereading=0;
 volatile int HallVolt=0;
 int preHall=1;
 int COUNT=0;
+unsigned long prev_time = 0;
+unsigned long elapsed_time = 0;
 
 /////////////////////////////////////////////////////////////////////////////////
 // STEPPER
@@ -75,7 +77,7 @@ void setup() {
   pinMode(BRAKE, OUTPUT);    
 
   // Wheel encoder
-  attachInterrupt(digitalPinToInterrupt(HALL_SENSOR), tick, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(HALL_SENSOR), tick, RISING);
 
   // Stepper motor
   pinMode(STE_1, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
@@ -98,6 +100,8 @@ void setup() {
   pinMode(BRAKE_ENCODER_ENABLE,OUTPUT);
   analogWrite(5,0); // set brake voltage as 0
   delay(5000);
+
+  prev_time = millis();
 }
 
 void loop() {
@@ -169,13 +173,12 @@ void loop() {
   }
 
   // Wheel encoder
-  if ((!HallVolt) && (preHall==1)) {
-    COUNT+=1;
-    tick_msg.data = true;
+  elapsed_time = millis() - prev_time;
+  if (elapsed_time >= 33) {
+    tick_msg.data = COUNT;
     pub_hall.publish(&tick_msg);
-    preHall=0;  
-  } else if (HallVolt){
-    preHall=1;
+    COUNT = 0;
+    prev_time = millis();
   }
 
   // Stepper
@@ -195,6 +198,15 @@ void loop() {
   delay(1);
 }
 
-void tick() {  
-  HallVolt = !HallVolt;
+void tick() {
+  COUNT++;
+//  HallVolt = !HallVolt;
+//  if ((!HallVolt) && (preHall==1)) {
+//    COUNT+=1;
+////    tick_msg.data = true;
+////    pub_hall.publish(&tick_msg);
+//    preHall=0;  
+//  } else if (HallVolt){
+//    preHall=1;
+//  }
 }
