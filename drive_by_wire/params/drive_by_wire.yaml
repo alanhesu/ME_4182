@@ -2,16 +2,21 @@
 # Every three numbers sets a motion for a period in time and is executed sequentially:
 # [linear velocity, angular velocity, duration (seconds)]
 
-dumb_plan: [0, 0, 10,
-            3, 0, 4,
+dumb_plan: [0, 0, 20,
+            1, 0, 3,
+            1, 0, 3,
+            -3, 0, 3              
             0, 0, 1]
 
-# Hardware PID
-kp_vel: 40
-ki_vel: .7
-kd_vel: 3
+# .5 0
+# 1 .021
 
-kp_turn: 1
+# Hardware PID
+kp_vel: 1
+ki_vel: 0
+kd_vel: 0
+
+kp_turn: 1000
 ki_turn: 0
 kd_turn: 0
 

@@ -16,6 +16,7 @@
 #define OPEN_RELAY(x) (pinMode(x,INPUT))
 #define SWITCHING_TIME 5
 #define PEDAL_DELAY 0
+#define STEPPER_RELAY 30
 
 /*Accel & Brake signal definitions*/
 #define ACCEL 6

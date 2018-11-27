@@ -40,8 +40,7 @@ def hall_interpreter():
         # elif count == 0 and rospy.get_time() - prev_time_tick > elapsed_time_tick:
         #     rps = .25/(rospy.get_time() - prev_time_tick)
         else:
-            rps = 2.23*(1.0/2312)*count/elapsed_time_tick # 4 ticks per revolution            
-            rospy.loginfo(rps)
+            rps = 2.23*(1.0/2312)*count/elapsed_time_tick # 4 ticks per revolution                        
         vel = rps*wheel_radius*2*math.pi
         wheel_encoder.header.stamp = rospy.Time.now()
         wheel_encoder.twist.twist.linear.x = vel        

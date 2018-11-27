@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy
+import math
 from pid import Pid
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
@@ -35,9 +36,10 @@ def callback_odom(data):
     stamp = data.header.stamp.to_sec()
     elapsed = stamp - prev
     if elapsed != 0:
-        val.throttle = pid_vel.pid(vel_curr.linear.x, vel_setp.linear.x, stamp)
-        if vel_curr.linear.x != 0:
-            val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z, pos_setp.orientation.z, stamp)/vel_curr.linear.x)
+        val.throttle = pid_vel.pid(0, vel_setp.linear.x, stamp)
+        # if vel_curr.linear.x != 0:
+        # val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z, pos_setp.orientation.z, stamp)/vel_curr.linear.x)
+        val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z*math.pi, pos_setp.orientation.z*math.pi, stamp))
     pub.publish(val)
 
 pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)

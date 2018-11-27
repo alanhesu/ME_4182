@@ -36,7 +36,7 @@ unsigned long elapsed_time = 0;
 // List Stepper Constants
 // for your motor
 const int stepsPerRevolution = 200;
-const int encoderLim = 8000;
+const int encoderLim = 7500;
 
 // initialize the stepper library on pins:
 Stepper myStepper(stepsPerRevolution, ST_4, ST_3, ST_2, ST_1);
@@ -64,7 +64,7 @@ void indec() {
 }
 
 void callback(const drive_by_wire::Cart_values& data) {
-  pedalVoltage = data.throttle + .7;
+  pedalVoltage = data.throttle;  
   steeringVoltage = data.steering_angle;
   newPos = steeringVoltage; // Set these equal to each other for now
   brakeVoltage = data.brake + .7;
@@ -81,6 +81,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(HALL_SENSOR), tick, RISING);
 
   // Stepper motor
+  CLOSE_RELAY(EMERGENCY_RELAY);
   pinMode(STE_1, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   pinMode(STE_2, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   pinMode(STE_3, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
@@ -136,7 +137,7 @@ void loop() {
       if (pedalVoltage > 0) {
         prevTime = nh.now();
         state = pedal1;
-      } else if (pedalVoltage < -1) {
+      } else if (pedalVoltage < 0) {
         prevTime = nh.now();
         state = brake1;
       }
@@ -152,7 +153,8 @@ void loop() {
         analogWrite(ACCEL, 0);
         state = pedal3;
       } else {
-        fitted = .0487*pow(pedalVoltage,3) - .5527*pow(pedalVoltage,2) + 2.3975*pedalVoltage - 1.4343;
+        float offset = pedalVoltage + .7;
+        fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*offset - 1.4343;
         analogWrite(ACCEL, constrain(fitted, 0, 5)*51);
         state = pedal2;
       }
@@ -162,12 +164,13 @@ void loop() {
       state = rest;
       break;
     case brake1:
-      if (pedalVoltage > -1) {
+      if (pedalVoltage > 0) {
         analogWrite(BRAKE, 0);
         state = rest;
       } else {
-        fitted = .0487*pow(pedalVoltage+1,3) - .5527*pow(pedalVoltage+1,2) + 2.3975*(pedalVoltage+1) - 1.4343;
-        analogWrite(BRAKE, -1*constrain(fitted, 0, 5)*51);
+        float offset = -1*pedalVoltage +.7;
+        fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*(offset) - 1.4343;
+        analogWrite(BRAKE, constrain(fitted, 0, 5)*51);        
         state = brake1;
       }
       break;
@@ -188,13 +191,14 @@ void loop() {
   actPos = newPosition;
 
   errPos = newPos - actPos;
-  if (errPos < -40 && actPos > -1*encoderLim) {
-    myStepper.step(-7);    
+  if (actPos > -1*encoderLim && actPos < encoderLim) {
+    if (errPos < -40) {
+      myStepper.step(7);    
+    }
+    else if (errPos > 40) {
+      myStepper.step(-7);    
+    }  
   }
-  else if (errPos > 40 && actPos < encoderLim) {
-    myStepper.step(7);    
-  }  
-  
   nh.spinOnce();
   delay(1);
 }

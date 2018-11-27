@@ -8,7 +8,7 @@ const int stepsPerRevolution = 200;  // change this to fit the number of steps p
 // for your motor
 
 // initialize the stepper library on pins:
-Stepper myStepper(stepsPerRevolution, 31, 33, 35, 37);
+Stepper myStepper(stepsPerRevolution, 33, 35, 37, 39);
 
 // Stepper Variables
 const int counts_p_rev = 1600;
@@ -17,7 +17,7 @@ const int counts_p_rev = 1600;
 // Encoder Input Pins
 int EncAPin = 3; //interrupt 4 (blue wire)
 int EncBPin = 2; //interrupt 5 (green wire)
-int EncIndPin = 21; //interrupt 2
+int EncIndPin = 18; //interrupt 2
 
 // Initialize the encoder library on interrupt pins:
 Encoder myEnc(EncAPin, EncBPin);
@@ -28,7 +28,7 @@ long newPosition = 0;
 int errPos = 0;
 
 // Calculation Variables
-int newPos = 8000; // Variable for scaled wheel desired position
+int newPos = -5000; // Variable for scaled wheel desired position
 int actPos = 0;
 int oldpos = 0;
 
@@ -41,6 +41,7 @@ void indec() {
 int countSteps = 0;
 
 void setup() {
+  pinMode(29, OUTPUT);
   // put your setup code here, to run once:
   pinMode(EncAPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   pinMode(EncBPin, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
@@ -60,11 +61,11 @@ void loop() {
 
   errPos = newPos - actPos;
   if (errPos < -40) {
-    myStepper.step(-7);
+    myStepper.step(7);
     //Firmata.sendAnalog(0, errPos); ////////////////////// check error value in cosole
   }
   else if (errPos > 40) {
-    myStepper.step(7);
+    myStepper.step(-7);
     //Firmata.sendAnalog(1, errPos); ////////////////////// check error value in cosole
   }  
 }
