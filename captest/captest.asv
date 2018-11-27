@@ -1,5 +1,0 @@
-clear;
-close all;
-
-num = xlsread('captest.xlsx');
-num(:,1) = x

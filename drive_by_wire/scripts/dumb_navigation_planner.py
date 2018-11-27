@@ -3,11 +3,14 @@ import rospy
 import time
 import math
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Pose
 
-pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+pub_twist = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+pub_pose = rospy.Publisher('cmd_pose', Pose, queue_size=10)
 rospy.init_node('dumb_navigation_planner', anonymous=True)
 rate = rospy.Rate(30)
 val = Twist()
+pos = Pose()
 fin = True
 ind = -1
 
@@ -17,7 +20,7 @@ else:
     rospy.signal_shutdown('No plan found!')
 
 def dumb_navigation_planner():
-    global prev_time, fin, val, duration, ind
+    global prev_time, fin, val, pos, duration, ind
 
     while not rospy.is_shutdown():
         if fin:
@@ -25,17 +28,17 @@ def dumb_navigation_planner():
             ind += 1
             if ind*3 + 3 > len(plan):
                 val.linear.x = 0
-                val.angular.z = 0
                 duration = 1
                 rospy.loginfo('plan ended')
                 pub.publish(val)
                 break
             else:
                 val.linear.x = plan[ind*3]
-                val.angular.z = plan[ind*3 + 1]
+                pos.orientation.z = plan[ind*3 + 1]
                 duration = plan[ind*3 + 2]
-            rospy.loginfo('Linear velocity of {} and angular velocity of {} for {} seconds'.format(val.linear.x, val.angular.z, duration))
-            pub.publish(val)
+            rospy.loginfo('Linear velocity of {} and orientation of {} for {} seconds'.format(val.linear.x, pos.orientation.z, duration))
+            pub_twist.publish(val)
+            pub_pose.publish(pos)
             fin = False
         else:
             if rospy.get_time() - prev_time >= duration:

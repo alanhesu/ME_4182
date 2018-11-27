@@ -34,8 +34,9 @@ unsigned long elapsed_time = 0;
 /////////////////////////////////////////////////////////////////////////////////
 // STEPPER
 // List Stepper Constants
-const int stepsPerRevolution = 200;
 // for your motor
+const int stepsPerRevolution = 200;
+const int encoderLim = 8000;
 
 // initialize the stepper library on pins:
 Stepper myStepper(stepsPerRevolution, ST_4, ST_3, ST_2, ST_1);
@@ -187,10 +188,10 @@ void loop() {
   actPos = newPosition;
 
   errPos = newPos - actPos;
-  if (errPos < -40) {
+  if (errPos < -40 && actPos > -1*encoderLim) {
     myStepper.step(-7);    
   }
-  else if (errPos > 40) {
+  else if (errPos > 40 && actPos < encoderLim) {
     myStepper.step(7);    
   }  
   
