@@ -36,7 +36,8 @@ def callback_odom(data):
     stamp = data.header.stamp.to_sec()
     elapsed = stamp - prev
     if elapsed != 0:
-        val.throttle = pid_vel.pid(0, vel_setp.linear.x, stamp)
+        # val.throttle = pid_vel.pid(0, vel_setp.linear.x, stamp)
+        val.throttle = 0.0113*vel_setp**5 + -0.1550*vel_setp**4 + 0.8438*vel_setp**3 + -2.3792*vel_setp**2 + 4.0388*vel_setp + 0.7273
         # if vel_curr.linear.x != 0:
         # val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z, pos_setp.orientation.z, stamp)/vel_curr.linear.x)
         val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z*math.pi, pos_setp.orientation.z*math.pi, stamp))
