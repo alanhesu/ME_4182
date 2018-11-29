@@ -6,6 +6,8 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
 from drive_by_wire.msg import Cart_values
+from tf.transformations import euler_from_quaternion
+from sensor_msgs.msg import Imu
 
 stamp = 0.0
 prev = 0.0
@@ -32,6 +34,11 @@ def callback_odom(data):
     global vel_curr, pos_curr, stamp, prev
     vel_curr = data.twist.twist
     pos_curr = data.pose.pose
+    rpy = euler_from_quaternion([pos_curr.orientation.x, 
+        pos_curr.orientation.y,
+        pos_curr.orientation.z,
+        pos_curr.orientation.w])
+    rospy.loginfo(rpy[2])
     prev = stamp
     stamp = data.header.stamp.to_sec()
     elapsed = stamp - prev
@@ -40,9 +47,18 @@ def callback_odom(data):
         val.throttle = 0.0113*vel_setp.linear.x**5 + -0.1550*vel_setp.linear.x**4 + 0.8438*vel_setp.linear.x**3 + -2.3792*vel_setp.linear.x**2 + 4.0388*vel_setp.linear.x + 0.7273
         # if vel_curr.linear.x != 0:
         # val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z, pos_setp.orientation.z, stamp)/vel_curr.linear.x)
-        val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z*math.pi, pos_setp.orientation.z, stamp))
+        # val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z*math.pi, pos_setp.orientation.z, stamp))
+        val.steering_angle = round(pid_turn.pid(rpy[2], pos_setp.orientation.z, stamp))
     pub.publish(val)
 
+def callback_imu(data):
+    rpy = euler_from_quaternion([data.orientation.x, 
+        data.orientation.y,
+        data.orientation.z,
+        data.orientation.w])
+    #rospy.loginfo(rpy[2])
+
+rospy.Subscriber('imu', Imu, callback_imu)
 pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
 rospy.init_node('hardware_controller', anonymous=True)
 rospy.Subscriber('cmd_vel', Twist, callback_vel)

@@ -87,7 +87,8 @@ void setup() {
   pinMode(STE_3, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   attachInterrupt(STE_3, indec, CHANGE); // Wait hold on.. they attached it to EncpinB (pin2) originally...
   myStepper.setSpeed(175);
-  
+
+  nh.setHardware->setBaud(57600);
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
