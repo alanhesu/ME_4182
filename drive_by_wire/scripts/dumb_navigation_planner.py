@@ -5,6 +5,7 @@ import math
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Int32
+from sensor_msgs.msg import LaserScan
 
 def callback_tick(data):
     global ind, start, time_a, count
@@ -20,13 +21,20 @@ def callback_tick(data):
     if start:
         count += data.data
 
+def callback_scan(data):
+    global scan
+    rospy.loginfo(data.ranges[])
+
+
 pub_twist = rospy.Publisher('cmd_vel', Twist, queue_size=10)
 pub_pose = rospy.Publisher('cmd_pose', Pose, queue_size=10)
 rospy.init_node('dumb_navigation_planner', anonymous=True)
 rospy.Subscriber("tick", Int32, callback_tick)
+rospy.Subscriber('scan_filtered', LaserScan, callback_scan)
 rate = rospy.Rate(30)
 val = Twist()
 pos = Pose()
+scan = LaserScan()
 fin = True
 ind = -1
 start = False
