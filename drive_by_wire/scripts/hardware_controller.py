@@ -38,7 +38,7 @@ def callback_odom(data):
         pos_curr.orientation.y,
         pos_curr.orientation.z,
         pos_curr.orientation.w])
-    rospy.loginfo(rpy[2])
+    rospy.loginfo(rpy)
     prev = stamp
     stamp = data.header.stamp.to_sec()
     elapsed = stamp - prev
