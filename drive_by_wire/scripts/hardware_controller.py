@@ -14,8 +14,9 @@ prev = 0.0
 
 def callback_vel(data):
     # constant = 1
-    global vel_setp
+    global vel_setp, pid_vel
     vel_setp = data
+    pid_vel.reset_accum()
     # linear_vel = data.linear.x
     # angular_vel = data.angular.z
     # val.throttle = linear_vel
@@ -27,14 +28,15 @@ def callback_vel(data):
     # rospy.loginfo(val.steering_angle)
 
 def callback_pos(data):
-    global pos_setp
+    global pos_setp, pid_turn
     pos_setp = data
+    pid_turn.reset_accum()
 
 def callback_odom(data):
     global vel_curr, pos_curr, stamp, prev
     vel_curr = data.twist.twist
     pos_curr = data.pose.pose
-    rpy = euler_from_quaternion([pos_curr.orientation.x, 
+    rpy = euler_from_quaternion([pos_curr.orientation.x,
         pos_curr.orientation.y,
         pos_curr.orientation.z,
         pos_curr.orientation.w])
@@ -53,7 +55,7 @@ def callback_odom(data):
     pub.publish(val)
 
 def callback_imu(data):
-    rpy = euler_from_quaternion([data.orientation.x, 
+    rpy = euler_from_quaternion([data.orientation.x,
         data.orientation.y,
         data.orientation.z,
         data.orientation.w])

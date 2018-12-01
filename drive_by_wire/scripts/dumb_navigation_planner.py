@@ -8,6 +8,7 @@ from std_msgs.msg import Int32
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
+from sensor_msgs.msg import PointCloud2
 
 def callback_tick(data):
     global ind, start, time_a, count
@@ -27,6 +28,19 @@ def callback_scan(data):
     global scan
     rospy.loginfo(len(data.ranges))
 
+def callback_cloud(data):
+    global ind, duration
+    cart_width = 1.143
+    ll = [-1*cart_width/2, 0]
+    ur = [cart_width/2, 2]
+    for p in PointCloud2.read_points(data, field_names = ('x', 'y', 'z'), skip_nans=True):
+        rospy.loginfo(p)
+        if p[0] > ll[0] and p[0] < ur[0] and p[1] > ll[1] and p[1] < ur[1]:
+            ind = len(plan) + 1
+            duration = 0
+            rospy.loginfo('Object detected!')
+
+
 def callback_odom(data):
     global pose_curr, vel_curr
     pose_curr = data.pose.pose
@@ -38,6 +52,7 @@ rospy.init_node('dumb_navigation_planner', anonymous=True)
 rospy.Subscriber("tick", Int32, callback_tick)
 rospy.Subscriber('odom', Odometry, callback_odom)
 rospy.Subscriber('scan_filtered', LaserScan, callback_scan)
+rospy.Subscriber('cloud_filtered', PointCloud2, callback_cloud)
 rate = rospy.Rate(30)
 val = Twist()
 pos = Pose()
@@ -62,7 +77,7 @@ def dumb_navigation_planner():
             prev_time = rospy.get_time()
             ind += 1
             if ind*3 + 3 > len(plan):
-                val.linear.x = 0
+                val.linear.x = -5
                 duration = 1
                 rospy.loginfo('plan ended')
                 pub_twist.publish(val)
