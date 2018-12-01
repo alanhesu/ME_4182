@@ -62,7 +62,7 @@ def dumb_navigation_planner():
             prev_time = rospy.get_time()
             ind += 1
             if ind*3 + 3 > len(plan):
-                val.linear.x =
+                val.linear.x = 0
                 duration = 1
                 rospy.loginfo('plan ended')
                 pub_twist.publish(val)

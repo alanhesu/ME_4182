@@ -81,14 +81,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(HALL_SENSOR), tick, RISING);
 
   // Stepper motor
-  CLOSE_RELAY(EMERGENCY_RELAY);
+  CLOSE_RELAY(STEPPER_RELAY);
   pinMode(STE_1, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   pinMode(STE_2, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   pinMode(STE_3, INPUT); //////initialize interupt pins to INPUT (floatpin issue)
   attachInterrupt(STE_3, indec, CHANGE); // Wait hold on.. they attached it to EncpinB (pin2) originally...
   myStepper.setSpeed(175);
 
-  nh.setHardware->setBaud(57600);
+  //nh.setHardware->setBaud(57600);
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
@@ -154,8 +154,9 @@ void loop() {
         analogWrite(ACCEL, 0);
         state = pedal3;
       } else {
-        float offset = pedalVoltage + .7;
-        fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*offset - 1.4343;
+        fitted = pedalVoltage;
+        //float offset = pedalVoltage + .7;
+        //fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*offset - 1.4343;
         analogWrite(ACCEL, constrain(fitted, 0, 5)*51);
         state = pedal2;
       }
@@ -169,8 +170,9 @@ void loop() {
         analogWrite(BRAKE, 0);
         state = rest;
       } else {
-        float offset = -1*pedalVoltage +.7;
-        fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*(offset) - 1.4343;
+        //float offset = -1*pedalVoltage +.7;
+        //fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*(offset) - 1.4343;
+        fitted = pedalVoltage;
         analogWrite(BRAKE, constrain(fitted, 0, 5)*51);        
         state = brake1;
       }
