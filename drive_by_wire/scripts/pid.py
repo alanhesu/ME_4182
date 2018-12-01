@@ -26,3 +26,6 @@ class Pid:
         self.e_prev = error
         self.pid_prev = self.kp*error + self.kd*de + self.ki*self.accum
         return self.pid_prev
+
+    def reset_accum(self):
+        self.accum = 0
