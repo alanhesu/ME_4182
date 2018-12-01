@@ -73,6 +73,7 @@ def dumb_navigation_planner():
                     pose_curr.orientation.z,
                     pose_curr.orientation.w])
                 val.linear.x = plan[ind*3]
+                #<heading sent to be actually interpreted> = <commanded heading> + <current heading>
                 pos.orientation.z = plan[ind*3 + 1] + rpy[2]
                 duration = plan[ind*3 + 2]
             rospy.loginfo('Linear velocity of {} and orientation of {} for {} seconds'.format(val.linear.x, pos.orientation.z, duration))

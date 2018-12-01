@@ -154,9 +154,7 @@ void loop() {
         analogWrite(ACCEL, 0);
         state = pedal3;
       } else {
-        fitted = pedalVoltage;
-        //float offset = pedalVoltage + .7;
-        //fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*offset - 1.4343;
+        fitted = -0.0164*pow(pedalVoltage ,3) - 0.0608*pow(pedalVoltage,2) + 1.7674*pedalVoltage;
         analogWrite(ACCEL, constrain(fitted, 0, 5)*51);
         state = pedal2;
       }

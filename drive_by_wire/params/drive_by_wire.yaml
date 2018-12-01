@@ -3,7 +3,7 @@
 # [linear velocity, angular velocity, duration (seconds)]
 
 dumb_plan: [0, 0, 20,
-            2.5, -1.58, 10,
+            .75, 1.58, 20,
             1.5, 0, 0,
             -3, 0, 3
             0, 0, 1]
@@ -15,7 +15,7 @@ ki_vel: 0
 kd_vel: 0
 
 kp_turn: 5000
-ki_turn: 0
+ki_turn: 0 #.0001
 kd_turn: 0
 
 # roll, pitch, yaw
