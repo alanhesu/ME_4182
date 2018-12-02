@@ -143,9 +143,9 @@ void loop() {
         state = brake1;
       }
 
-      if (isManual) {
-        state = off;
-      }
+//      if (isManual) {
+//        state = off;
+//      }
       break;
     case pedal1:
       CLOSE_RELAY(ACCEL_FAILSAFE);
@@ -163,9 +163,9 @@ void loop() {
         state = pedal2;
       }
 
-      if (isManual) {
-        state = off;
-      }
+//      if (isManual) {
+//        state = off;
+//      }
       break;
     case pedal3:
       OPEN_RELAY(ACCEL_FAILSAFE);
@@ -183,9 +183,9 @@ void loop() {
         state = brake1;
       }
 
-      if (isManual) {
-        state = off;
-      }
+//      if (isManual) {
+//        state = off;
+//      }
       break;
   }
 
