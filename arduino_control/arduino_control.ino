@@ -19,6 +19,7 @@ float pedalVoltage = 0;
 float steeringVoltage = 0;
 float brakeVoltage = 0;
 float fitted;
+bool isManual;
 
 // Wheel encoder
 std_msgs::Int32 tick_msg;
@@ -67,7 +68,8 @@ void callback(const drive_by_wire::Cart_values& data) {
   pedalVoltage = data.throttle;  
   steeringVoltage = data.steering_angle;
   newPos = steeringVoltage; // Set these equal to each other for now
-  brakeVoltage = data.brake + .7;
+  brakeVoltage = data.brake + .7;  
+  isManual = data.is_manual;
 }
 
 ros::Subscriber<drive_by_wire::Cart_values> sub("Arduino_commands", &callback);
@@ -96,32 +98,30 @@ void setup() {
   state = off;  
   prevTime = nh.now();
 
-  pinMode(IGNITION_RELAY,OUTPUT);  
-  pinMode(FORWARD_RELAY,OUTPUT);  
-  pinMode(ACCEL_ENCODER_ENABLE,OUTPUT);
-  analogWrite(6,0); // set accel voltage as 0
-  pinMode(BRAKE_ENCODER_ENABLE,OUTPUT);
-  analogWrite(5,0); // set brake voltage as 0
-  delay(5000);
-
   prev_time = millis();
+  isManual = false;
 }
 
 void loop() {
   // State machine
   switch(state) {
     case off:
-      state = rest;
-      prevTime = nh.now();
+      if (!isManual) {
+        state = start1;
+        prevTime = nh.now();
+      } else {
+        state = off;
+      }
       break;
     case start1:
-//      CLOSE_RELAY(EMERGENCY_RELAY);
-//      CLOSE_RELAY(ACCEL_ENCODER_ENABLE);
-//      CLOSE_RELAY(BRAKE_ENCODER_ENABLE);
-      if (nh.now().toSec() - prevTime.toSec() >= SWITCHING_TIME/1000) {
-        prevTime = nh.now();
-        state = start2;       
-      }
+      pinMode(IGNITION_RELAY,OUTPUT);  
+      pinMode(FORWARD_RELAY,OUTPUT);  
+      pinMode(ACCEL_ENCODER_ENABLE,OUTPUT);
+      analogWrite(6,0); // set accel voltage as 0
+      pinMode(BRAKE_ENCODER_ENABLE,OUTPUT);
+      analogWrite(5,0); // set brake voltage as 0
+      delay(5000);
+      state = rest;       
       break;
     case start2:
 //      CLOSE_RELAY(IGNITION_RELAY);
@@ -142,6 +142,10 @@ void loop() {
         prevTime = nh.now();
         state = brake1;
       }
+
+      if (isManual) {
+        state = off;
+      }
       break;
     case pedal1:
       CLOSE_RELAY(ACCEL_FAILSAFE);
@@ -158,6 +162,10 @@ void loop() {
         analogWrite(ACCEL, constrain(fitted, 0, 5)*51);
         state = pedal2;
       }
+
+      if (isManual) {
+        state = off;
+      }
       break;
     case pedal3:
       OPEN_RELAY(ACCEL_FAILSAFE);
@@ -173,6 +181,10 @@ void loop() {
         fitted = -1*pedalVoltage;
         analogWrite(BRAKE, constrain(fitted, 0, 5)*51);        
         state = brake1;
+      }
+
+      if (isManual) {
+        state = off;
       }
       break;
   }
