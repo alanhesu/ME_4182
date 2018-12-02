@@ -3,10 +3,19 @@
 # [linear velocity, angular velocity, duration (seconds)]
 
 dumb_plan: [0, 0, 20,
-            .75, 1.58, 20,
+            1.5, 0, 19,
+            1.5, 1.58, 9.13,
+            1.5, 0, 14,
+            1.5, 1.58, 9.13,
+            1.5, 0, 14
             1.5, 0, 0,
             -3, 0, 3
             0, 0, 1]
+
+#long path time = 19s @ 1.5ms
+#turn time = 9.13s @ 1.5ms // 1.58rad
+#short path time = 14s @ 1.5ms
+#turn time = 9.13s @ 1.5ms // 1.58rad
 
 
 # Hardware PID
@@ -14,8 +23,8 @@ kp_vel: 1
 ki_vel: 0
 kd_vel: 0
 
-kp_turn: 5000
-ki_turn: .0001
+kp_turn: 7500
+ki_turn: .005
 kd_turn: 0
 
 # Cart geometry [m]

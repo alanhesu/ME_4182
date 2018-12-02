@@ -55,7 +55,13 @@ def callback_odom(data):
             # if vel_curr.linear.x != 0:
             # val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z, pos_setp.orientation.z, stamp)/vel_curr.linear.x)
             # val.steering_angle = round(pid_turn.pid(pos_curr.orientation.z*math.pi, pos_setp.orientation.z, stamp))
+
+            # rpy[2] = <current yaw> |||| pos_setp.orientation.z = <commanded yaw> (pos_setp is setpoint)
             val.steering_angle = -1*round(pid_turn.pid(rpy[2], pos_setp.orientation.z, stamp))
+            if not (vel_setp.linear.x == 0):
+                val.steering_angle = val.steering_angle / vel_setp.linear.x
+        rospy.loginfo(rpy[2])
+
         pub.publish(val)
 
 def callback_imu(data):
@@ -65,7 +71,6 @@ def callback_imu(data):
         data.orientation.y,
         data.orientation.z,
         data.orientation.w])
-    rospy.loginfo(imu_started)
 
 rospy.Subscriber('imu', Imu, callback_imu)
 pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
