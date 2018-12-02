@@ -24,6 +24,7 @@ prev_time = 0.0
 prev_time_tick = 0.0
 elapsed_time_tick = 0.0
 wheel_radius = .215
+wheel_radius = rospy.get_param('wheel_radius')
 wheel_encoder = TwistWithCovarianceStamped()
 wheel_encoder.header.frame_id = 'base_link'
 if rospy.has_param('twist0_covariance'):

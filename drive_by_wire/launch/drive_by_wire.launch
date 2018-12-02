@@ -5,11 +5,12 @@
   <rosparam command="load" file="$(find drive_by_wire)/params/drive_by_wire.yaml" />
   <node pkg="tf" type="static_transform_publisher" name="gps_broadcaster" args="0 2 0 0 0 0 1 base_link gps 100" />
   <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 2 0 0 1.58 0 base_link imu 100" />
-  <node pkg="tf" type="static_transform_publisher" name="lidar_broadcaster" args="0 2 0 0 0 0 1 base_link lidar 100" />
+  <node pkg="tf" type="static_transform_publisher" name="lidar_broadcaster" args="0 2 0 0 0 0 base_link laser 100" />
 
   <arg name="razor_config_file" default="$(find drive_by_wire)/params/razor.yaml"/>
   <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
     <rosparam file="$(arg razor_config_file)" command="load"/>
+    <param name="port" type="string" value="/dev/ttyACM2"/>
   </node>
 
   <!--node pkg="drive_by_wire" name="keyboard_input" type="keyboard_input.py" output="screen"> </node-->
@@ -23,11 +24,23 @@
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_continuous" clear_params="true">
     <rosparam command="load" file="$(find drive_by_wire)/params/ekf_continuous.yaml" />
-
-   <!--  Placeholder for output topic remapping
-    <remap from="odometry/filtered" to=""/>
-    <remap from="accel/filtered" to=""/>
-    -->
-
   </node>
+
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+          <!--remap from="scan" to="base_scan" /-->
+          <rosparam command="load" file="$(find drive_by_wire)/params/laser_filter.yaml" />
+    </node>
+
+    <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
+        <param name="serial_port"         type="string" value="/dev/ttyACM0"/>
+        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
+        <param name="frame_id"            type="string" value="laser"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+    </node>
+
+    <node pkg="drive_by_wire" name="scan_to_cloud" type="scan_to_cloud.py" output="screen"></node>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find drive_by_wire)/rviz/rplidar.rviz" />
 </launch>

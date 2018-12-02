@@ -15,8 +15,13 @@ ki_vel: 0
 kd_vel: 0
 
 kp_turn: 5000
-ki_turn: 0 #.0001
+ki_turn: .0001
 kd_turn: 0
+
+# Cart geometry [m]
+wheel_radius: .215
+chassis_width: .2
+stopping_distance: .5
 
 # roll, pitch, yaw
 # float[9]

@@ -2,6 +2,7 @@
 import rospy
 import math
 from pid import Pid
+from unwrapper import Unwrapper
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
@@ -42,7 +43,8 @@ def callback_odom(data):
             pos_curr.orientation.y,
             pos_curr.orientation.z,
             pos_curr.orientation.w])
-        rospy.loginfo(rpy)
+        rpy = (rpy[0], rpy[1], -1*unwrapper.unwrap(rpy[2]))
+        # rospy.loginfo(rpy)
         prev = stamp
         stamp = data.header.stamp.to_sec()
         elapsed = stamp - prev
@@ -86,6 +88,7 @@ ki_turn = rospy.get_param('ki_turn')
 kd_turn = rospy.get_param('kd_turn')
 pid_vel = Pid(kp_vel, ki_vel, kd_vel)
 pid_turn = Pid(kp_turn, ki_turn, kd_turn)
+unwrapper = Unwrapper(math.pi)
 
 def hardware_controller():
     while not rospy.is_shutdown():

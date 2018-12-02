@@ -56,7 +56,7 @@ Visualization Manager:
         Value: true
       Axis: Z
       Channel Name: intensity
-      Class: rviz/LaserScan
+      Class: rviz/PointCloud2
       Color: 255; 255; 255
       Color Transformer: AxisColor
       Decay Time: 0
@@ -73,7 +73,7 @@ Visualization Manager:
       Size (Pixels): 5
       Size (m): 0.03
       Style: Squares
-      Topic: /scan_filtered
+      Topic: /cloud_filtered
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
