@@ -2,10 +2,19 @@
 #include <ros.h>
 #include <drive_by_wire/Cart_values.h>
 #include <std_msgs/Int32.h>
-#include "Cart/Cart.h"
+#include "src/Cart.h"
+#include "src/LTC2944_Arduino.h"
+#include "src/CoulombCounter.h"
 #include <ros/time.h>
+#include <I2C.h>
 #include <Stepper.h>
 #include <Encoder.h>
+
+// Setting up Coulomb Counter object
+CoulombCounter::CCValues cc_data;
+CoulombCounter cc = CoulombCounter(64, 0.0001, 4.0);
+energy_logger::coulomb_counter_vals cc_msg;
+//ros::Publisher pub_cc("Energy_Readings", &cc_msg);
 
 // State machine
 enum State {off, start1, start2, start3, rest, pedal1, pedal2, pedal3, brake1};
@@ -73,6 +82,9 @@ void callback(const drive_by_wire::Cart_values& data) {
 ros::Subscriber<drive_by_wire::Cart_values> sub("Arduino_commands", &callback);
 
 void setup() {
+  // Setup i2c communications for the LTC2944.
+  LTC2944_initialize();
+  
   // Pedal and brake
   pinMode(ACCEL, OUTPUT);
   pinMode(BRAKE, OUTPUT);    
@@ -92,6 +104,7 @@ void setup() {
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
+  //nh.advertise(pub_cc);
 
   state = off;  
   prevTime = nh.now();
@@ -200,6 +213,20 @@ void loop() {
       myStepper.step(-7);    
     }  
   }
+
+  //Get the energy data from the Coulomb Counter
+  cc_data = cc.update()
+  /*
+  cc_msg.data.voltage = cc_data.voltage;
+  cc_msg.data.power = cc_data.power;
+  cc_msg.data.energy = cc_data.energy;
+  cc_msg.data.charge = cc_data.charge;
+  cc_msg.data.current = cc_data.current;
+  cc_msg.data.temperature = cc_data.temperature;
+  pub_cc.publish(&cc_msg);
+  */
+  
+  
   nh.spinOnce();
   delay(1);
 }
