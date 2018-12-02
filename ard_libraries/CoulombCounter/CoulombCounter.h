@@ -4,34 +4,50 @@
 #ifndef CoulombCounter_H
 #define CoulombCounter_H
 
+#define MICROSCONSTANT 1000000
+
 class CoulombCounter{
 	public:
-		CoulombCounter(uint8_t prescaler, float resistor);
+		struct CCValues { //LTC2944 data outs
+			double voltage;
+			double current;
+			double charge;
+			double power;
+			double energy;//Not a direct output. Calculated using trapezoidal integration of power
+			float temperature;
+		};
 
-		void update();//Should be called as often as possible (every loop) for accurate integration
+		CCValues ccv;
 
-		float getVoltage();
+		CoulombCounter(uint16_t prescaler, float resistor, float vscaler);
 
-		float getCurrent();
+		CCValues update();//Should be called as often as possible (every loop) for accurate integration
 
-		float getPower();
+		double getVoltage();
 
-		float getCharge();
+		double getCurrent();
+
+		double getPower();
+
+		double getCharge();
 
 		float getTemperature();
 
-		float getEnergy();
+		double getEnergy();
+
+		uint16_t getPrescalar();
+
+		float getResistor();
+
+		void reset();
 
 	private:
-		int prescaler;//LTC2944 prescaler. Use the macros defined in LTC2944.h
+		uint16_t prescalar;//LTC2944 prescaler. Use the macros defined in LTC2944.h
 		float resistor;//Resistor value in mOhms
-		int8_t ack;//I2C acknowledgement. 0 = acknowledged. 1 = not acknowledged
+		float vscaler;//If the attachment location of the counter does NOT measure across all cells
 
-		float voltage, current, charge, temperature;//LTC2944 data outs
-
-		float pwr_p, pwr_c;//previous and current power measurements
-		unsigned long t_p, t_c;//time stamps of previous and current power measurements
-		float energy;//Not a direct output. Calculated using trapezoidal integration of power
+		double pwr_p;//previous power measurement
+		unsigned long t_c, t_p;//time stamps of previous and current power measurements
 };
 
 
