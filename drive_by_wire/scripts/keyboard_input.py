@@ -4,13 +4,15 @@ import rospy
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from drive_by_wire.msg import Cart_values
+from std_msgs.msg import Bool
+
 # import keyboard
 
-pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
+pub = rospy.Publisher('manual', Bool, queue_size=10)
 rospy.init_node('keyboard_input', anonymous=True)
 rate = rospy.Rate(30) # 10hz
-val = Cart_values()
-val.is_manual = False
+val = Bool()
+val.data = False
 
 def keyboard_input():
     global val
@@ -29,7 +31,7 @@ def keyboard_input():
         #     if vel_msg.angular.z < vel_max_angular:
         #         vel_msg.angular.z += vel_angular_inc
         if 'b' in text:
-            val.is_manual = not val.is_manual
+            val.data = not val.data
         # if 'n' in text:
         #     vel_msg.linear.z = 0
         pub.publish(val)

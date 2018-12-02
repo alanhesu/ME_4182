@@ -6,9 +6,11 @@ from unwrapper import Unwrapper
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Bool
 from drive_by_wire.msg import Cart_values
 from tf.transformations import euler_from_quaternion
 from sensor_msgs.msg import Imu
+
 
 stamp = 0.0
 prev = 0.0
@@ -39,7 +41,7 @@ def callback_odom(data):
     if imu_started:
         vel_curr = data.twist.twist
         pos_curr = data.pose.pose
-        rpy = euler_from_quaternion([pos_curr.orientation.x, 
+        rpy = euler_from_quaternion([pos_curr.orientation.x,
             pos_curr.orientation.y,
             pos_curr.orientation.z,
             pos_curr.orientation.w])
@@ -61,11 +63,15 @@ def callback_odom(data):
 def callback_imu(data):
     global imu_started
     imu_started = True
-    rpy = euler_from_quaternion([data.orientation.x, 
+    rpy = euler_from_quaternion([data.orientation.x,
         data.orientation.y,
         data.orientation.z,
         data.orientation.w])
     rospy.loginfo(imu_started)
+
+def callback_manual(data):
+    global val
+    val.is_manual = data.data
 
 rospy.Subscriber('imu', Imu, callback_imu)
 pub = rospy.Publisher('Arduino_commands', Cart_values, queue_size=10)
@@ -73,6 +79,7 @@ rospy.init_node('hardware_controller', anonymous=True)
 rospy.Subscriber('cmd_vel', Twist, callback_vel)
 rospy.Subscriber('cmd_pose',Pose, callback_pos)
 rospy.Subscriber("odom", Odometry, callback_odom)
+rospy.Subscriber('manual', Bool, callback_manual)
 rate = rospy.Rate(30)
 val = Cart_values()
 vel_setp = Twist()

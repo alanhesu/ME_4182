@@ -68,7 +68,7 @@ void callback(const drive_by_wire::Cart_values& data) {
   pedalVoltage = data.throttle;  
   steeringVoltage = data.steering_angle;
   newPos = steeringVoltage; // Set these equal to each other for now
-  brakeVoltage = data.brake + .7;
+  brakeVoltage = data.brake + .7;  
   isManual = data.is_manual;
 }
 
