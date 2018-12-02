@@ -2,10 +2,17 @@
 #include <ros.h>
 #include <drive_by_wire/Cart_values.h>
 #include <std_msgs/Int32.h>
-#include "Cart/Cart.h"
+#include "src/Cart.h"
+#include "src/LTC2944_Arduino.h"
+#include "src/CoulombCounter.h"
 #include <ros/time.h>
 #include <Stepper.h>
 #include <Encoder.h>
+
+//Coulomb Counter
+CoulombCounter::CCValues cc_data;
+CoulombCounter cc = CoulombCounter(64, 0.0001, 4.0);
+
 
 // State machine
 enum State {off, start1, start2, start3, rest, pedal1, pedal2, pedal3, brake1};
@@ -75,6 +82,9 @@ void callback(const drive_by_wire::Cart_values& data) {
 ros::Subscriber<drive_by_wire::Cart_values> sub("Arduino_commands", &callback);
 
 void setup() {
+  //Setup I2C communications for the Coulomb Counter
+  LTC2944_initialize();
+  
   // Pedal and brake
   pinMode(ACCEL, OUTPUT);
   pinMode(BRAKE, OUTPUT);    
@@ -188,6 +198,10 @@ void loop() {
 //      }
       break;
   }
+
+  // Coulomb Counter
+  cc_data = cc.update()
+
 
   // Wheel encoder
   elapsed_time = millis() - prev_time;
