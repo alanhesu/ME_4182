@@ -35,7 +35,7 @@ def callback_cloud(data):
     ur = [stop_dist, chassis_width/2]
     rospy.loginfo(obj_accum)
     if obj_accum > 0:
-        obj_accum -= 10        
+        obj_accum -= 3       
     for p in pc2.read_points(data, field_names = ('x', 'y', 'z', 'intensity', 'index'), skip_nans=True):
         # rospy.loginfo(p)
         p = (-1*p[0], p[1], p[2], p[3], p[4])
@@ -43,8 +43,8 @@ def callback_cloud(data):
             obj_accum += 1
             if obj_accum >= obj_thresh:
                 rospy.loginfo('Object threshold reached')
-                    ind = len(plan) + 1
-                    duration = 0
+                # ind = len(plan) + 1
+                # duration = 0
             # rospy.loginfo('Close point detected!')
             # rospy.loginfo(p)
 
@@ -74,7 +74,7 @@ chassis_width = 1.143
 chassis_width = rospy.get_param('chassis_width')
 stop_dist = .5
 stop_dist = rospy.get_param('stopping_distance')
-obj_thresh = 20
+obj_thresh = 3
 obj_accum = 0
 
 unwrapper = Unwrapper(math.pi)

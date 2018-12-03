@@ -15,7 +15,7 @@
 
 # 
 dumb_plan: [0, 0, 20,
-            1, 0, 5,
+            2, 0, 6,
             -3, 0, 1,
             0, 0, 1]
 
@@ -36,8 +36,8 @@ kd_turn: 0
 
 # Cart geometry [m]
 wheel_radius: .215
-chassis_width: 1.143
-stopping_distance: 1
+chassis_width: 2
+stopping_distance: 5
 
 # roll, pitch, yaw
 # float[9]

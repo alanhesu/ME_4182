@@ -128,7 +128,9 @@ void loop() {
       break;
     case start1:
       pinMode(IGNITION_RELAY,OUTPUT);  
-      pinMode(FORWARD_RELAY,OUTPUT);  
+      delay(100);
+      pinMode(FORWARD_RELAY,OUTPUT);
+      delay(100);  
       pinMode(ACCEL_ENCODER_ENABLE,OUTPUT);
       analogWrite(6,0); // set accel voltage as 0
       pinMode(BRAKE_ENCODER_ENABLE,OUTPUT);
@@ -156,9 +158,9 @@ void loop() {
         state = brake1;
       }
 
-//      if (isManual) {
-//        state = off;
-//      }
+      if (isManual) {
+        state = off;
+      }
       break;
     case pedal1:
       CLOSE_RELAY(ACCEL_FAILSAFE);
@@ -176,9 +178,9 @@ void loop() {
         state = pedal2;
       }
 
-//      if (isManual) {
-//        state = off;
-//      }
+      if (isManual) {
+        state = off;
+      }
       break;
     case pedal3:
       OPEN_RELAY(ACCEL_FAILSAFE);
@@ -192,13 +194,16 @@ void loop() {
         //float offset = -1*pedalVoltage +.7;
         //fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*(offset) - 1.4343;
         fitted = -1*pedalVoltage;
-        analogWrite(BRAKE, constrain(fitted, 0, 5)*51);        
+        analogWrite(BRAKE, constrain(fitted, 0, 5)*51); 
+        if (fitted == 5) {
+          CLOSE_RELAY(BRAKE_FULLSTOP);       
+        }
         state = brake1;
       }
 
-//      if (isManual) {
-//        state = off;
-//      }
+      if (isManual) {
+        state = off;
+      }
       break;
   }
 
