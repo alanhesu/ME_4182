@@ -35,25 +35,3 @@
 #define STE_1 2 //stepper encoder pin B
 #define STE_2 3 //stepper encoder pin A
 #define STE_3 18 //stepper encoder pin index
-
-
-
-/*Cart Class definition*/
-
-class Cart{
-	public:
-		Cart();
-
-        void driveBegin();
-
-        void setCartForward();
-
-        void setCartReverse();
-
-        void setCartNeutral();
-
-        void driveShutdown();
-
-    private:
-        int state;
-};
