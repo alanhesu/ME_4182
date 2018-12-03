@@ -25,6 +25,7 @@ def update(updated_categories):
 	
 	for cate in updated_categories:
 		dpoint = np.random.normal(size = 1)[0]
+
 		CData.addTime(cate, itr)
 		CData.addData(cate, dpoint)
 

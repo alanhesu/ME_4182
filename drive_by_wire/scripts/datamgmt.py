@@ -20,9 +20,10 @@ class CartData:
 			if currnumsamples > self.samples:
 				diff = currnumsamples - self.samples
 				self.data[key] = self.data[key][diff:]
+				self.time[key] = self.time[key][diff:]
 
 	def addTime(self, category, tpoint):
-		currnumsamples = len(self.time)
+		currnumsamples = len(self.time[category])
 
 		if currnumsamples == self.samples:
 			self.time[category] = self.time[category][1:] + [tpoint]
@@ -41,7 +42,7 @@ class CartData:
 			diff = currnumsamples - self.samples
 			self.data[category] = (self.data[category])[diff+1:] + [datapoint]
 		else:
-			self.data[category] = self.data[category] + [datapoint]
+			self.data[category].append(datapoint)
 
 	def getCategory(self, category):
 		return self.data[category]
