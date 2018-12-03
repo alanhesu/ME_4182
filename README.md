@@ -26,7 +26,7 @@ git clone https://github.com/alanhesu/ME_4182.git
 
 And to install all necessary packages and libraries, run:
 ```
-cd ME_4182
+cd ~/catkin_ws/src/ME_4182
 sudo ./package_install.sh
 ```
 
