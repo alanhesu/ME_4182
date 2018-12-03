@@ -45,15 +45,8 @@ def callback_cloud(data):
             obj_accum += 1
             if obj_accum >= obj_thresh:
                 rospy.loginfo('Object threshold reached')
-<<<<<<< HEAD
                 ind = len(plan) + 1
                 duration = 0
-=======
-                #ind = len(plan) + 1
-                #duration = 0
->>>>>>> 3ef1d02cfce01fe94ca6dbfd5b50a9f861618345
-            # rospy.loginfo('Close point detected!')
-            # rospy.loginfo(p)
 
 def callback_odom(data):
     global pose_curr, vel_curr
@@ -81,7 +74,7 @@ chassis_width = 1.143
 chassis_width = rospy.get_param('chassis_width')
 stop_dist = .5
 stop_dist = rospy.get_param('stopping_distance')
-obj_thresh = 50000#7
+obj_thresh = 10
 obj_accum = 0
 
 unwrapper = Unwrapper(math.pi)

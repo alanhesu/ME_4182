@@ -10,7 +10,7 @@
   <arg name="razor_config_file" default="$(find drive_by_wire)/params/razor.yaml"/>
   <node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
     <rosparam file="$(arg razor_config_file)" command="load"/>
-    <param name="port" type="string" value="/dev/ttyACM3"/>
+    <param name="port" type="string" value="/dev/ttyACM2"/>
   </node>
 
   <node pkg="drive_by_wire" name="keyboard_input" type="keyboard_input.py" output="screen"> </node>
@@ -32,7 +32,7 @@
     </node>
 
     <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
-        <param name="serial_port"         type="string" value="/dev/ttyACM2"/>
+        <param name="serial_port"         type="string" value="/dev/ttyACM1"/>
         <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
         <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
         <param name="frame_id"            type="string" value="laser"/>
