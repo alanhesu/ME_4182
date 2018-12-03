@@ -1,6 +1,6 @@
-#include <LTC2944.h>
 #include <ros.h>
 #include <drive_by_wire/Cart_values.h>
+#include <drive_by_wire/coulomb_counter_vals.h>
 #include <std_msgs/Int32.h>
 #include "src/Cart.h"
 #include "src/LTC2944_Arduino.h"
@@ -12,6 +12,8 @@
 //Coulomb Counter
 CoulombCounter::CCValues cc_data;
 CoulombCounter cc = CoulombCounter(64, 0.0001, 4.0);
+drive_by_wire::coulomb_counter_vals energyData;
+ros::Publisher pub_energy("energy", &energyData);
 
 
 // State machine
@@ -104,6 +106,7 @@ void setup() {
   nh.initNode();
   nh.subscribe(sub);
   nh.advertise(pub_hall);
+  nh.advertise(pub_energy);
 
   state = off;  
   prevTime = nh.now();
@@ -200,8 +203,15 @@ void loop() {
   }
 
   // Coulomb Counter
-  cc_data = cc.update()
-
+  cc_data = cc.update();
+  energyData.voltage = cc_data.voltage;
+  energyData.current = cc_data.current;
+  energyData.power = cc_data.power;
+  energyData.charge = cc_data.charge;
+  energyData.temperature = cc_data.temperature;
+  energyData.energy = cc_data.energy;
+  pub_energy.publish(&energyData);
+  
 
   // Wheel encoder
   elapsed_time = millis() - prev_time;

@@ -51,6 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    Cart_values.msg
+   coulomb_counter_vals.msg
  )
 
 ## Generate services in the 'srv' folder
