@@ -31,6 +31,6 @@ imu_yaw_calibration: 0.0
 ### gyroscope
 gyro_average_offset_x: 0.0
 gyro_average_offset_y: -0.01
-gyro_average_offset_z: 0.0149
+gyro_average_offset_z: 0.0145
 #a more positive value makes the imu go negative;
 #a more negative value makes the imu go positive.
