@@ -12,6 +12,10 @@ fit = polyfit(capOut, pwmOut, 3);
 x = linspace(min(capOut), max(capOut));
 y = polyval(fit, x);
 plot(x,y);
+legend('Experimental data', 'Fitted trend');
+title('Input voltage v. capacitor response');
+xlabel('Capacitor response (V)');
+ylabel('Input voltage (V)');
 
 num = [.5, 0;
 1, .021;
@@ -37,3 +41,7 @@ fit = polyfit(vel, volt, 5);
 x = linspace(min(vel), max(vel));
 y = polyval(fit, x);
 plot(x,y);
+legend('Experimental data', 'Fitted trend');
+title('Cart speed v. input voltage');
+xlabel('Input voltage (V)');
+ylabel('Cart speed (m/s)');
