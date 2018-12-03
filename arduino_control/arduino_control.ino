@@ -15,7 +15,6 @@ CoulombCounter cc = CoulombCounter(64, 0.0001, 4.0);
 drive_by_wire::coulomb_counter_vals energyData;
 ros::Publisher pub_energy("energy", &energyData);
 
-
 // State machine
 enum State {off, start1, start2, start3, rest, pedal1, pedal2, pedal3, brake1};
 State state;
