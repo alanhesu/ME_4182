@@ -2,6 +2,10 @@
 # apt-get update
 source ~/.bashrc
 source /opt/ros/kinetic
+echo "Installing pyqt libraries"
+pip install pyqt5
+pip install pyqtgraph
+
 
 echo "Installing ROS packages"
 apt-get install ros-kinetic-laser-filters -y
