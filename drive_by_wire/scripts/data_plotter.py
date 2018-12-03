@@ -6,7 +6,24 @@ import time
 import plotutils
 from datamgmt import CartData
 import rospy
+from drive_by_wire.msg import coulomb_counter_vals
+from nav_msgs.msg import Odometry
+from tf.transformations import euler_from_quaternion
 
+def callback_odom(data):
+	global vals
+	pos = data.pose.pose
+	rpy = euler_from_quaternion([pos.orientation.x, pos.orientation.y, pos.orientation.z, pos.orientation.w])
+	vals[5] = data.twist.twist.linear.x
+	vals[6] = rpy[2]
+
+def callback_energy(data):
+	global vals
+	vals[0] = data.voltage
+	vals[1] = data.current
+	vals[2] = data.power
+	vals[3] = data.charge
+	vals[4] = data.energy
 
 def update(updated_categories):
 	global itr, samplesnum, CData, optionsarr, titles, properties, plotpacks
@@ -22,7 +39,7 @@ def update(updated_categories):
 			plotutils.clearLayout(layout)
 			plotpacks = plotutils.setPlots(layout, properties, 0, 2)
 
-	
+
 	for cate in updated_categories:
 		dpoint = np.random.normal(size = 1)[0]
 
@@ -35,7 +52,12 @@ def update(updated_categories):
 
 	QtGui.QApplication.processEvents()
 
+rospy.init_node('data_plotter', anonymous=True)
+rospy.Subscriber('energy', coulomb_counter_vals, callback_energy)
+rospy.Subscriber('odom', Odometry, callback_odom)
+rate = rospy.Rate(30)
 
+vals = [None]*7
 titles = ['Voltage (V)','Current (A)','Power (W)', 'Charge (mAh)', 'Energy (J)', 'Velocity (m/s)', 'Angle (degrees)']
 CData = CartData(titles, 200)
 
@@ -71,8 +93,8 @@ def data_plotter():
 
 	w.show()
 	while not rospy.is_shutdown():
-		update(titles)
-	
+		rate.sleep()
+
 	#Always exec Qt
 	app.exec_()
 
