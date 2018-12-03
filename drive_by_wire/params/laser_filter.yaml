@@ -1,6 +1,6 @@
 scan_filter_chain:
-- name: interpolation
-  type: laser_filters/InterpolationFilter
+# - name: interpolation
+  # type: laser_filters/InterpolationFilter
 - name: angle
   type: laser_filters/LaserScanAngularBoundsFilterInPlace
   params:

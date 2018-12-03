@@ -128,7 +128,9 @@ void loop() {
       break;
     case start1:
       pinMode(IGNITION_RELAY,OUTPUT);  
-      pinMode(FORWARD_RELAY,OUTPUT);  
+      delay(100);
+      pinMode(FORWARD_RELAY,OUTPUT);
+      delay(100);  
       pinMode(ACCEL_ENCODER_ENABLE,OUTPUT);
       analogWrite(6,0); // set accel voltage as 0
       pinMode(BRAKE_ENCODER_ENABLE,OUTPUT);
@@ -191,8 +193,11 @@ void loop() {
       } else {
         //float offset = -1*pedalVoltage +.7;
         //fitted = .0487*pow(offset,3) - .5527*pow(offset,2) + 2.3975*(offset) - 1.4343;
-        fitted = pedalVoltage;
-        analogWrite(BRAKE, constrain(fitted, 0, 5)*51);        
+        fitted = -1*pedalVoltage;
+        analogWrite(BRAKE, constrain(fitted, 0, 5)*51); 
+        if (fitted == 5) {
+          CLOSE_RELAY(BRAKE_FULLSTOP);       
+        }
         state = brake1;
       }
 
@@ -227,15 +232,13 @@ void loop() {
   long newPosition = myEnc.read();  
   actPos = newPosition;
 
-  errPos = newPos - actPos;
-  if (actPos > -1*encoderLim && actPos < encoderLim) {
-    if (errPos < -40) {
+  errPos = newPos - actPos;  
+    if (errPos < -40 && actPos > -1*encoderLim) {
       myStepper.step(7);    
     }
-    else if (errPos > 40) {
+    else if (errPos > 40 && actPos < encoderLim) {
       myStepper.step(-7);    
-    }  
-  }
+    }
   nh.spinOnce();
   delay(1);
 }
