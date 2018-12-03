@@ -42,5 +42,5 @@
 
     <node pkg="drive_by_wire" name="scan_to_cloud" type="scan_to_cloud.py" output="screen"></node>
 
-    <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find drive_by_wire)/rviz/rplidar.rviz" /-->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find drive_by_wire)/rviz/rplidar.rviz" />
 </launch>
