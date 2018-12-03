@@ -40,12 +40,18 @@ def callback_cloud(data):
     for p in pc2.read_points(data, field_names = ('x', 'y', 'z', 'intensity', 'index'), skip_nans=True):
         # rospy.loginfo(p)
         p = (-1*p[0], p[1], p[2], p[3], p[4])
-        if p[0] > ll[0] and p[0] < ur[0] and p[1] > ll[1] and p[1] < ur[1]:           
+        if p[0] > ll[0] and p[0] < ur[0] and p[1] > ll[1] and p[1] < ur[1]:          
+            rospy.loginfo(p[0])
             obj_accum += 1
             if obj_accum >= obj_thresh:
                 rospy.loginfo('Object threshold reached')
+<<<<<<< HEAD
                 ind = len(plan) + 1
                 duration = 0
+=======
+                #ind = len(plan) + 1
+                #duration = 0
+>>>>>>> 3ef1d02cfce01fe94ca6dbfd5b50a9f861618345
             # rospy.loginfo('Close point detected!')
             # rospy.loginfo(p)
 

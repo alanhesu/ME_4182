@@ -31,6 +31,7 @@ def updatePlot(plot_pack, x, y, color, texlen = 30):
 	plot = plot_pack[0]
 	text = plot_pack[1]
 	title = plot_pack[2]
+	# print(y)
 	text.setText((title + ": {0:03.4f}".format(y[-1])).ljust(texlen))
 	plot.plot(x = x, y = y, clear = True, pen = color)
 
