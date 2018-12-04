@@ -12,7 +12,7 @@ from tf.transformations import euler_from_quaternion
 
 
 vals = dict()
-titles = ['Voltage (V)','Current (A)','Power (W)', 'Charge (mAh)', 'Energy (J)', 'Velocity (m/s)', 'Angle (degrees)']
+titles = ['Voltage (V)','Current (A)','Power (W)', 'Charge (mAh)', 'Energy (J)', 'Velocity (m/s)', 'Angle (radians)']
 for cate in titles:
 	vals[cate] = 0
 
@@ -41,7 +41,7 @@ layout.addWidget(samplesnum, 1, 1, 1, 1)
 
 plotpacks = plotutils.setPlots(layout, properties, 0, 2)
 
-#display the plots
+#display the plots.
 
 
 
@@ -101,7 +101,7 @@ def data_plotter():
 	global itr, w, app, titles, vals
 	w.show()
 	while not rospy.is_shutdown():
-		rospy.loginfo(vals)
+		# rospy.loginfo(vals)
 		update(titles)
 		rate.sleep()
 

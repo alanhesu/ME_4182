@@ -63,7 +63,7 @@ def callback_odom(data):
             if not (vel_setp.linear.x == 0):
                 val.steering_angle = val.steering_angle / vel_setp.linear.x
         # rospy.loginfo(rpy[2])
-        rospy.loginfo(vel_curr.linear.x)
+        # rospy.loginfo(vel_curr.linear.x)
         pub.publish(val)
 
 def callback_imu(data):
