@@ -41,7 +41,7 @@ def setPlots(layout, titles, col, offset):
 	for idx in range(0,len(titles)):
 		plotpacks.append(setPlot(layout, titles[idx], offset+idx, col))
 
-	plotpacks[-1][0].setLabel('bottom', "Time(s)")	
+	plotpacks[-1][0].setLabel('bottom', "Samples")	
 
 	return plotpacks
 
