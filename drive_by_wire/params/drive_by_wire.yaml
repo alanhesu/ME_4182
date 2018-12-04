@@ -1,26 +1,26 @@
 # Dumb plan
 # Every three numbers sets a motion for a period in time and is executed sequentially:
-# [linear velocity, angular velocity, duration (seconds)]
+# [linear velocity (m/s), relative heading (radians), duration (seconds)]
 
 # parking lot plan
-# dumb_plan: [0, 0, 20,
-#             1.5, 0, 18,
-#             1.5, 1.58, 9.13,
-#             1.5, 0, 7.5,
-#             1.5, 1.58, 9.13,
-#             1.5, 0, 14
-#             1.5, 0, 0,
-#             -3, 0, 3
-#             0, 0, 1]
+dumb_plan:  [0, 0, 20,
+        1.5, 0, 18,
+        1.5, 1.58, 9.13,
+        1.5, 0, 7.5,
+        1.5, 1.58, 9.13,
+        1.5, 0, 14
+        1.5, 0, 0,
+        -3, 0, 3
+        0, 0, 1]
 
-# 
-dumb_plan: [0, 0, 20,
-            1, -1.58, 15,
-            1, -1.58, 15,
-            1, -1.58, 15,
-            1, -1.58, 15,
-            -3, 0, 1,
-            0, 0, 1]
+#
+# dumb_plan: [0, 0, 20,
+#             1, -1.58, 15,
+#             1, -1.58, 15,
+#             1, -1.58, 15,
+#             1, -1.58, 15,
+#             -3, 0, 1,
+#             0, 0, 1]
 
 #long path time = 19s @ 1.5ms
 #turn time = 9.13s @ 1.5ms // 1.58rad

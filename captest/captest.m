@@ -43,5 +43,6 @@ y = polyval(fit, x);
 plot(x,y);
 legend('Experimental data', 'Fitted trend');
 title('Cart speed v. input voltage');
-xlabel('Input voltage (V)');
-ylabel('Cart speed (m/s)');
+xlabel('Cart speed (m/s)');
+ylabel('Input voltage (m/s)');
+set(gca, 'FontSize', 18);
