@@ -31,7 +31,7 @@ def callback_tick(data):
 
 def callback_cloud(data):
     global ind, duration, chassis_width, obj_thresh, obj_accum, stop_dist, vel_curr
-    stop_dist = rospy.get_param('stopping_distance') * 1.4 * vel_curr.linear.x
+    #stop_dist = 0.2
     ll = [0, -1*chassis_width/2]
     ur = [stop_dist, chassis_width/2]
     #rospy.loginfo(obj_accum)
@@ -70,10 +70,8 @@ fin = True
 ind = -1
 start = False
 count = 0
-chassis_width = 1.143
-chassis_width = rospy.get_param('chassis_width')
-stop_dist = .5
-stop_dist = rospy.get_param('stopping_distance')
+chassis_width = rospy.get_param('chassis_width', 1.143)
+stop_dist = rospy.get_param('stopping_distance', .5)
 obj_thresh = 10
 obj_accum = 0
 
