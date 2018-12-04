@@ -36,11 +36,11 @@ def callback_cloud(data):
     ur = [stop_dist, chassis_width/2]
     #rospy.loginfo(obj_accum)
     if obj_accum > 0:
-        obj_accum -= 3       
+        obj_accum -= 3
     for p in pc2.read_points(data, field_names = ('x', 'y', 'z', 'intensity', 'index'), skip_nans=True):
         # rospy.loginfo(p)
         p = (-1*p[0], p[1], p[2], p[3], p[4])
-        if p[0] > ll[0] and p[0] < ur[0] and p[1] > ll[1] and p[1] < ur[1]:          
+        if p[0] > ll[0] and p[0] < ur[0] and p[1] > ll[1] and p[1] < ur[1]:
             rospy.loginfo(p[0])
             obj_accum += 1
             if obj_accum >= obj_thresh:
@@ -91,7 +91,19 @@ def dumb_navigation_planner():
         if fin:
             prev_time = rospy.get_time()
             ind += 1
-            if ind*3 + 3 > len(plan):
+            # EXPO plan specific
+            if ind == 10:
+                ind = 1
+                rpy = euler_from_quaternion([pose_curr.orientation.x,
+                    pose_curr.orientation.y,
+                    pose_curr.orientation.z,
+                    pose_curr.orientation.w])
+                rpy = (rpy[0], rpy[1], -1*unwrapper.unwrap(rpy[2]))
+                val.linear.x = plan[ind*3]
+                #<heading sent to be actually interpreted> = <commanded heading> + <current heading>
+                pos.orientation.z = plan[ind*3 + 1] + rpy[2]
+                duration = plan[ind*3 + 2]
+            elif ind*3 + 3 > len(plan):
                 val.linear.x = -5
                 duration = 1
                 rospy.loginfo('plan ended')
