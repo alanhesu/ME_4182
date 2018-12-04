@@ -90,7 +90,7 @@ def dumb_navigation_planner():
             prev_time = rospy.get_time()
             ind += 1
             # EXPO plan specific
-            if ind == 10:
+            if ind == 9:
                 ind = 1
                 rpy = euler_from_quaternion([pose_curr.orientation.x,
                     pose_curr.orientation.y,
@@ -106,7 +106,8 @@ def dumb_navigation_planner():
                 duration = 1
                 rospy.loginfo('plan ended')
                 pub_twist.publish(val)
-                break
+                ind = -1
+                # break
             else:
                 rpy = euler_from_quaternion([pose_curr.orientation.x,
                     pose_curr.orientation.y,
